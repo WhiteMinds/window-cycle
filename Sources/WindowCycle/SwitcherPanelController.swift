@@ -30,7 +30,7 @@ final class SwitcherPanelController {
 
     func show() {
         resizeToFitContent()
-        centerOnActiveScreen()
+        positionNearTopOfActiveScreen()
         panel.orderFrontRegardless()
     }
 
@@ -50,7 +50,7 @@ final class SwitcherPanelController {
         panel.setContentSize(NSSize(width: 614, height: targetHeight))
     }
 
-    private func centerOnActiveScreen() {
+    private func positionNearTopOfActiveScreen() {
         let screen = NSScreen.main ?? NSScreen.screens.first
         guard let frame = screen?.visibleFrame else {
             panel.center()
@@ -58,9 +58,10 @@ final class SwitcherPanelController {
         }
 
         let panelFrame = panel.frame
+        let topMargin = min(max(frame.height * 0.16, 88), 160)
         let origin = NSPoint(
             x: frame.midX - panelFrame.width / 2,
-            y: frame.midY - panelFrame.height / 2
+            y: frame.maxY - panelFrame.height - topMargin
         )
         panel.setFrameOrigin(origin)
     }

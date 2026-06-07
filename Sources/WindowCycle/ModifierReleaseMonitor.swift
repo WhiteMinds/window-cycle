@@ -129,7 +129,7 @@ final class ModifierReleaseMonitor {
     }
 
     private func handle(nsEvent event: NSEvent) {
-        if event.type == .keyDown {
+        if event.type == .keyDown, eventTap == nil {
             switch Int(event.keyCode) {
             case kVK_Escape:
                 Task { @MainActor [onEscape] in
