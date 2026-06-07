@@ -45,14 +45,17 @@ final class AXWindowService {
             kAXWindowsAttribute as String,
             from: appElement
         ) as [AXUIElement]
+        let focusedWindow = readAXElementAttribute(kAXFocusedWindowAttribute as String, from: appElement)
 
-        return rawWindows.enumerated().compactMap { index, element in
+        let windows = rawWindows.enumerated().compactMap { index, element in
             makeWindowInfo(
                 element: element,
                 application: application,
                 index: index + 1
             )
         }
+
+        return orderWindows(windows, focusedWindow: focusedWindow)
     }
 
     func activate(_ window: AppWindow) throws {
@@ -99,12 +102,35 @@ final class AXWindowService {
             pid: application.processIdentifier,
             appName: application.localizedName ?? "Unknown App",
             bundleIdentifier: application.bundleIdentifier,
+            appIcon: application.icon,
             axElement: element,
             title: title.isEmpty ? "Untitled Window" : title,
             frame: frame,
             isMinimized: minimized,
             indexHint: index
         )
+    }
+
+    private func orderWindows(_ windows: [AppWindow], focusedWindow: AXUIElement?) -> [AppWindow] {
+        guard let focusedWindow,
+              let focusedIndex = windows.firstIndex(where: { CFEqual($0.axElement, focusedWindow) })
+        else {
+            return windows.enumerated().map { index, window in
+                var window = window
+                window.indexHint = index + 1
+                return window
+            }
+        }
+
+        var ordered = windows
+        let focused = ordered.remove(at: focusedIndex)
+        ordered.insert(focused, at: 0)
+
+        return ordered.enumerated().map { index, window in
+            var window = window
+            window.indexHint = index + 1
+            return window
+        }
     }
 
     private func readArrayAttribute<T>(_ attribute: String, from element: AXUIElement) throws -> [T] {
@@ -138,6 +164,18 @@ final class AXWindowService {
             return nil
         }
         return rawValue as? Bool
+    }
+
+    private func readAXElementAttribute(_ attribute: String, from element: AXUIElement) -> AXUIElement? {
+        var rawValue: CFTypeRef?
+        let error = AXUIElementCopyAttributeValue(element, attribute as CFString, &rawValue)
+        guard error == .success,
+              let value = rawValue,
+              CFGetTypeID(value) == AXUIElementGetTypeID()
+        else {
+            return nil
+        }
+        return (value as! AXUIElement)
     }
 
     private func readFrame(from element: AXUIElement) -> CGRect? {

@@ -4,25 +4,14 @@ struct SwitcherView: View {
     @ObservedObject var model: SwitcherModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            header
+        VStack(alignment: .leading, spacing: 0) {
             content
         }
-        .frame(width: 560)
-        .padding(16)
-        .background(Color(nsColor: .windowBackgroundColor))
-    }
-
-    private var header: some View {
-        HStack(spacing: 10) {
-            Text(model.appName)
-                .font(.headline)
-                .lineLimit(1)
-            Spacer()
-            Text("Cmd+`")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
+        .frame(width: 680)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     @ViewBuilder
@@ -31,9 +20,9 @@ struct SwitcherView: View {
             Text(model.statusText.isEmpty ? "No windows" : model.statusText)
                 .font(.body)
                 .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, minHeight: 96, alignment: .center)
+                .frame(maxWidth: .infinity, minHeight: 64, alignment: .center)
         } else {
-            VStack(spacing: 6) {
+            VStack(spacing: 2) {
                 ForEach(Array(model.windows.enumerated()), id: \.element.id) { index, window in
                     WindowRow(
                         window: window,
@@ -50,35 +39,49 @@ private struct WindowRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 12) {
-            Text("\(window.indexHint)")
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .frame(width: 24, alignment: .trailing)
+        HStack(spacing: 10) {
+            Text(keyHint)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(isSelected ? .white.opacity(0.88) : .secondary)
+                .frame(width: 42, alignment: .leading)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(window.title)
-                    .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                    .lineLimit(1)
+            Text(window.appName)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .lineLimit(1)
+                .frame(width: 102, alignment: .leading)
 
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            if let appIcon = window.appIcon {
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .frame(width: 22, height: 22)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            } else {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(isSelected ? .white.opacity(0.28) : .secondary.opacity(0.18))
+                    .frame(width: 22, height: 22)
             }
+
+            Text(window.title)
+                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .lineLimit(1)
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(isSelected ? Color.accentColor.opacity(0.16) : Color.clear)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .frame(height: 32)
+        .padding(.horizontal, 8)
+        .background(isSelected ? Color.accentColor : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 5))
     }
 
-    private var subtitle: String {
-        let frame = window.frame
-        let state = window.isMinimized ? "minimized" : "visible"
-        return "\(state) - \(Int(frame.width)) x \(Int(frame.height))"
+    private var keyHint: String {
+        let appPrefix = firstVisibleString(in: window.appName) ?? "?"
+        let titlePrefix = firstVisibleString(in: window.title) ?? "\(window.indexHint)"
+        return "\(appPrefix)\(titlePrefix)".lowercased()
+    }
+
+    private func firstVisibleString(in value: String) -> String? {
+        value.first { !$0.isWhitespace }.map(String.init)
     }
 }
-

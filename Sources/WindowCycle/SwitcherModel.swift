@@ -22,7 +22,7 @@ final class SwitcherModel: ObservableObject {
 
         switch direction {
         case .next:
-            selectedIndex = windows.isEmpty ? 0 : 0
+            selectedIndex = windows.count > 1 ? 1 : 0
         case .previous:
             selectedIndex = windows.isEmpty ? 0 : max(windows.count - 1, 0)
         }

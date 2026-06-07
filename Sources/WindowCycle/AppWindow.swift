@@ -6,6 +6,7 @@ struct AppWindow: Identifiable {
     let pid: pid_t
     let appName: String
     let bundleIdentifier: String?
+    let appIcon: NSImage?
     let axElement: AXUIElement
     var title: String
     var frame: CGRect
@@ -17,4 +18,3 @@ enum WindowCycleDirection {
     case next
     case previous
 }
-

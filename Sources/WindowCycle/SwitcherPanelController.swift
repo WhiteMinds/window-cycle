@@ -7,7 +7,7 @@ final class SwitcherPanelController {
 
     private lazy var panel: NSPanel = {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 560, height: 320),
+            contentRect: NSRect(x: 0, y: 0, width: 708, height: 180),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -16,7 +16,8 @@ final class SwitcherPanelController {
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
         panel.level = .floating
-        panel.backgroundColor = .windowBackgroundColor
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
         panel.hasShadow = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.contentView = NSHostingView(rootView: SwitcherView(model: model))
@@ -38,15 +39,15 @@ final class SwitcherPanelController {
     }
 
     private func resizeToFitContent() {
-        let rowHeight: CGFloat = 50
-        let headerHeight: CGFloat = 72
-        let minHeight: CGFloat = 156
-        let maxHeight: CGFloat = 420
+        let rowHeight: CGFloat = 34
+        let verticalPadding: CGFloat = 18
+        let minHeight: CGFloat = 82
+        let maxHeight: CGFloat = 356
         let targetHeight = model.windows.isEmpty
             ? minHeight
-            : min(maxHeight, max(minHeight, headerHeight + CGFloat(model.windows.count) * rowHeight))
+            : min(maxHeight, max(minHeight, verticalPadding + CGFloat(model.windows.count) * rowHeight))
 
-        panel.setContentSize(NSSize(width: 560, height: targetHeight))
+        panel.setContentSize(NSSize(width: 708, height: targetHeight))
     }
 
     private func centerOnActiveScreen() {
