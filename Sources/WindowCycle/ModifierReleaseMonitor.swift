@@ -6,6 +6,7 @@ import Foundation
 final class ModifierReleaseMonitor {
     private let onCommandReleased: @MainActor () -> Void
     private let onEscape: @MainActor () -> Void
+    private let onMoveSelection: @MainActor (WindowCycleDirection) -> Void
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var globalMonitor: Any?
@@ -14,10 +15,12 @@ final class ModifierReleaseMonitor {
 
     init(
         onCommandReleased: @escaping @MainActor () -> Void,
-        onEscape: @escaping @MainActor () -> Void
+        onEscape: @escaping @MainActor () -> Void,
+        onMoveSelection: @escaping @MainActor (WindowCycleDirection) -> Void
     ) {
         self.onCommandReleased = onCommandReleased
         self.onEscape = onEscape
+        self.onMoveSelection = onMoveSelection
     }
 
     deinit {
@@ -99,11 +102,26 @@ final class ModifierReleaseMonitor {
     }
 
     fileprivate func handle(event: CGEvent) {
-        if event.type == .keyDown, event.getIntegerValueField(.keyboardEventKeycode) == kVK_Escape {
-            Task { @MainActor [onEscape] in
-                onEscape()
+        if event.type == .keyDown {
+            switch Int(event.getIntegerValueField(.keyboardEventKeycode)) {
+            case kVK_Escape:
+                Task { @MainActor [onEscape] in
+                    onEscape()
+                }
+                return
+            case kVK_UpArrow:
+                Task { @MainActor [onMoveSelection] in
+                    onMoveSelection(.previous)
+                }
+                return
+            case kVK_DownArrow:
+                Task { @MainActor [onMoveSelection] in
+                    onMoveSelection(.next)
+                }
+                return
+            default:
+                break
             }
-            return
         }
 
         let isCommandDown = event.flags.contains(.maskCommand)
@@ -111,11 +129,26 @@ final class ModifierReleaseMonitor {
     }
 
     private func handle(nsEvent event: NSEvent) {
-        if event.type == .keyDown, event.keyCode == kVK_Escape {
-            Task { @MainActor [onEscape] in
-                onEscape()
+        if event.type == .keyDown {
+            switch Int(event.keyCode) {
+            case kVK_Escape:
+                Task { @MainActor [onEscape] in
+                    onEscape()
+                }
+                return
+            case kVK_UpArrow:
+                Task { @MainActor [onMoveSelection] in
+                    onMoveSelection(.previous)
+                }
+                return
+            case kVK_DownArrow:
+                Task { @MainActor [onMoveSelection] in
+                    onMoveSelection(.next)
+                }
+                return
+            default:
+                break
             }
-            return
         }
 
         let isCommandDown = event.modifierFlags.contains(.command)

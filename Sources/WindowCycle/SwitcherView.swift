@@ -7,22 +7,22 @@ struct SwitcherView: View {
         VStack(alignment: .leading, spacing: 0) {
             content
         }
-        .frame(width: 680)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 9)
+        .frame(width: 590)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
         .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipShape(RoundedRectangle(cornerRadius: 7))
     }
 
     @ViewBuilder
     private var content: some View {
         if model.windows.isEmpty {
             Text(model.statusText.isEmpty ? "No windows" : model.statusText)
-                .font(.body)
+                .font(.system(size: 13))
                 .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, minHeight: 64, alignment: .center)
+                .frame(maxWidth: .infinity, minHeight: 52, alignment: .center)
         } else {
-            VStack(spacing: 2) {
+            VStack(spacing: 1) {
                 ForEach(Array(model.windows.enumerated()), id: \.element.id) { index, window in
                     WindowRow(
                         window: window,
@@ -39,49 +39,34 @@ private struct WindowRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
-            Text(keyHint)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(isSelected ? .white.opacity(0.88) : .secondary)
-                .frame(width: 42, alignment: .leading)
-
+        HStack(spacing: 8) {
             Text(window.appName)
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(isSelected ? .white : .primary)
                 .lineLimit(1)
-                .frame(width: 102, alignment: .leading)
+                .frame(width: 82, alignment: .leading)
 
             if let appIcon = window.appIcon {
                 Image(nsImage: appIcon)
                     .resizable()
-                    .frame(width: 22, height: 22)
+                    .frame(width: 19, height: 19)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             } else {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(isSelected ? .white.opacity(0.28) : .secondary.opacity(0.18))
-                    .frame(width: 22, height: 22)
+                    .frame(width: 19, height: 19)
             }
 
             Text(window.title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
+                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                 .foregroundStyle(isSelected ? .white : .primary)
                 .lineLimit(1)
 
             Spacer(minLength: 0)
         }
-        .frame(height: 32)
-        .padding(.horizontal, 8)
+        .frame(height: 27)
+        .padding(.horizontal, 7)
         .background(isSelected ? Color.accentColor : Color.clear)
-        .clipShape(RoundedRectangle(cornerRadius: 5))
-    }
-
-    private var keyHint: String {
-        let appPrefix = firstVisibleString(in: window.appName) ?? "?"
-        let titlePrefix = firstVisibleString(in: window.title) ?? "\(window.indexHint)"
-        return "\(appPrefix)\(titlePrefix)".lowercased()
-    }
-
-    private func firstVisibleString(in value: String) -> String? {
-        value.first { !$0.isWhitespace }.map(String.init)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }

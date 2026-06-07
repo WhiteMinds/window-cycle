@@ -25,6 +25,9 @@ final class AppController: NSObject, NSApplicationDelegate {
             },
             onEscape: { [weak self] in
                 self?.cancelSwitcher()
+            },
+            onMoveSelection: { [weak self] direction in
+                self?.moveSelectionIfNeeded(direction)
             }
         )
 
@@ -82,6 +85,15 @@ final class AppController: NSObject, NSApplicationDelegate {
             return
         }
         panelController.hide()
+    }
+
+    private func moveSelectionIfNeeded(_ direction: WindowCycleDirection) {
+        guard panelController.isVisible else {
+            return
+        }
+
+        panelController.model.moveSelection(direction)
+        panelController.show()
     }
 
     private func activateSelectedWindowIfNeeded() {
