@@ -1,6 +1,6 @@
 # Current App Window Switcher
 
-Prototype for a Contexts-like single feature:
+Prototype for a current-application window switcher:
 
 - `Cmd + \`` shows windows for the current frontmost app and cycles forward.
 - `Cmd + Shift + \`` cycles backward.
@@ -14,14 +14,14 @@ This is a prototype, not a finished product. It intentionally uses public APIs f
 - AppKit `NSPanel`
 - SwiftUI panel content
 - Accessibility / AX window enumeration and `AXRaise`
-- Listen-only `CGEvent.tapCreate` for Command release
-- `NSEvent` global/local monitors as a fallback for Escape and modifier release
+- `CGEvent.tapCreate` for Command release and consuming switcher navigation keys
+- `NSEvent` global/local monitors as fallback paths
 
 ## Requirements
 
 - Xcode 26.5 or newer
 - Accessibility permission for the app/executable
-- Input Monitoring may be needed for Command-release activation
+- Input Monitoring may be needed for consuming arrow/Escape key events
 
 ## Run From Xcode
 
@@ -39,7 +39,7 @@ Run the `WindowCycle` executable target.
 swift run WindowCycle
 ```
 
-The executable will ask for Accessibility permission. If Command-release activation does not work, grant Input Monitoring permission too or run the bundled app build below.
+The executable will ask for Accessibility permission. If arrow/Escape handling does not work or is not consumed by the switcher, grant Input Monitoring permission too or run the bundled app build below.
 
 ## Build A Local .app Bundle
 
@@ -78,3 +78,10 @@ rebuilt app.
 - Cross-Space and full-screen behavior is not handled with private CGS/SLS APIs.
 - Window sorting is currently AX order, not CGWindow z-order.
 - Keyboard conflict handling is not polished.
+
+## Docs
+
+- [Current state](docs/current-state.md)
+- [Architecture](docs/architecture.md)
+- [Permissions, signing, and distribution](docs/signing-distribution.md)
+- [Roadmap](docs/roadmap.md)
