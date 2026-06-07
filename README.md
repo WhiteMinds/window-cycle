@@ -52,15 +52,15 @@ The bundle sets `LSUIElement = true`, so it behaves like an agent app without a 
 Use the menu bar icon to quit the app if the switcher panel gets stuck.
 
 The build script signs the app bundle with the stable bundle identifier
-`dev.local.WindowCycle`. By default it uses ad-hoc signing because this machine
-does not currently have a valid code signing identity:
+`dev.local.WindowCycle`. On this machine it uses the local self-signed identity
+`WindowCycle Local Code Signing` when available, and falls back to ad-hoc signing
+otherwise:
 
 ```sh
 Scripts/build-app.sh
 ```
 
-If you create an Apple Development or local code signing certificate, pass it to
-the script so macOS privacy permissions can survive rebuilds more reliably:
+You can override the signing identity explicitly:
 
 ```sh
 CODESIGN_IDENTITY="Apple Development: Your Name (...)" Scripts/build-app.sh

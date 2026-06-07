@@ -5,7 +5,16 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_DIR="$ROOT_DIR/.build/WindowCycle.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
-CODESIGN_IDENTITY="${CODESIGN_IDENTITY:--}"
+LOCAL_CODESIGN_IDENTITY="WindowCycle Local Code Signing"
+CODESIGN_IDENTITY="${CODESIGN_IDENTITY:-}"
+
+if [[ -z "$CODESIGN_IDENTITY" ]]; then
+  if security find-identity -v -p codesigning | grep -Fq "\"$LOCAL_CODESIGN_IDENTITY\""; then
+    CODESIGN_IDENTITY="$LOCAL_CODESIGN_IDENTITY"
+  else
+    CODESIGN_IDENTITY="-"
+  fi
+fi
 
 cd "$ROOT_DIR"
 swift build -c debug
@@ -45,4 +54,4 @@ PLIST
 
 codesign --force --sign "$CODESIGN_IDENTITY" --identifier dev.local.WindowCycle "$APP_DIR"
 
-echo "Built $APP_DIR"
+echo "Built $APP_DIR with signing identity: $CODESIGN_IDENTITY"
