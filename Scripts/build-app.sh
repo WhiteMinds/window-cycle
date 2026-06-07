@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_DIR="$ROOT_DIR/.build/WindowCycle.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
+CODESIGN_IDENTITY="${CODESIGN_IDENTITY:--}"
 
 cd "$ROOT_DIR"
 swift build -c debug
@@ -42,5 +43,6 @@ cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
-echo "Built $APP_DIR"
+codesign --force --sign "$CODESIGN_IDENTITY" --identifier dev.local.WindowCycle "$APP_DIR"
 
+echo "Built $APP_DIR"

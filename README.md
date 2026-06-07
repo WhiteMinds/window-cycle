@@ -51,6 +51,26 @@ open .build/WindowCycle.app
 The bundle sets `LSUIElement = true`, so it behaves like an agent app without a normal Dock icon.
 Use the menu bar icon to quit the app if the switcher panel gets stuck.
 
+The build script signs the app bundle with the stable bundle identifier
+`dev.local.WindowCycle`. By default it uses ad-hoc signing because this machine
+does not currently have a valid code signing identity:
+
+```sh
+Scripts/build-app.sh
+```
+
+If you create an Apple Development or local code signing certificate, pass it to
+the script so macOS privacy permissions can survive rebuilds more reliably:
+
+```sh
+CODESIGN_IDENTITY="Apple Development: Your Name (...)" Scripts/build-app.sh
+```
+
+macOS privacy permissions are tied to code identity, not just the visible app
+name. With ad-hoc signing, code changes can still produce a new identity, so an
+older enabled `WindowCycle` entry in Accessibility may not match a freshly
+rebuilt app.
+
 ## Current Limitations
 
 - No settings UI yet.
