@@ -12,6 +12,7 @@ final class ModifierReleaseMonitor {
     private var globalMonitor: Any?
     private var localMonitor: Any?
     private var wasCommandDown = false
+    private var isSwitcherVisible = false
 
     init(
         onCommandReleased: @escaping @MainActor () -> Void,
@@ -57,20 +58,27 @@ final class ModifierReleaseMonitor {
         runLoopSource = nil
         eventTap = nil
         wasCommandDown = false
+        isSwitcherVisible = false
+    }
+
+    func setSwitcherVisible(_ isVisible: Bool) {
+        isSwitcherVisible = isVisible
     }
 
     private func startNSEventMonitors() {
         globalMonitor = NSEvent.addGlobalMonitorForEvents(
-            matching: [.flagsChanged, .keyDown]
+            matching: [.flagsChanged]
         ) { [weak self] event in
-            self?.handle(nsEvent: event)
+            _ = self?.handle(nsEvent: event, canConsume: false)
         }
 
         localMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.flagsChanged, .keyDown]
         ) { [weak self] event in
-            self?.handle(nsEvent: event)
-            return event
+            guard let self else {
+                return event
+            }
+            return self.handle(nsEvent: event, canConsume: true) ? nil : event
         }
     }
 
@@ -82,7 +90,7 @@ final class ModifierReleaseMonitor {
         eventTap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
-            options: .listenOnly,
+            options: .defaultTap,
             eventsOfInterest: mask,
             callback: modifierReleaseCallback,
             userInfo: userInfo
@@ -101,24 +109,31 @@ final class ModifierReleaseMonitor {
         CGEvent.tapEnable(tap: eventTap, enable: true)
     }
 
-    fileprivate func handle(event: CGEvent) {
-        if event.type == .keyDown {
+    fileprivate func handle(event: CGEvent, type: CGEventType) -> Bool {
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let eventTap {
+                CGEvent.tapEnable(tap: eventTap, enable: true)
+            }
+            return false
+        }
+
+        if event.type == .keyDown, isSwitcherVisible {
             switch Int(event.getIntegerValueField(.keyboardEventKeycode)) {
             case kVK_Escape:
                 Task { @MainActor [onEscape] in
                     onEscape()
                 }
-                return
+                return true
             case kVK_UpArrow:
                 Task { @MainActor [onMoveSelection] in
                     onMoveSelection(.previous)
                 }
-                return
+                return true
             case kVK_DownArrow:
                 Task { @MainActor [onMoveSelection] in
                     onMoveSelection(.next)
                 }
-                return
+                return true
             default:
                 break
             }
@@ -126,26 +141,27 @@ final class ModifierReleaseMonitor {
 
         let isCommandDown = event.flags.contains(.maskCommand)
         handleCommandState(isCommandDown)
+        return false
     }
 
-    private func handle(nsEvent event: NSEvent) {
-        if event.type == .keyDown, eventTap == nil {
+    private func handle(nsEvent event: NSEvent, canConsume: Bool) -> Bool {
+        if event.type == .keyDown, canConsume, isSwitcherVisible {
             switch Int(event.keyCode) {
             case kVK_Escape:
                 Task { @MainActor [onEscape] in
                     onEscape()
                 }
-                return
+                return true
             case kVK_UpArrow:
                 Task { @MainActor [onMoveSelection] in
                     onMoveSelection(.previous)
                 }
-                return
+                return true
             case kVK_DownArrow:
                 Task { @MainActor [onMoveSelection] in
                     onMoveSelection(.next)
                 }
-                return
+                return true
             default:
                 break
             }
@@ -153,6 +169,7 @@ final class ModifierReleaseMonitor {
 
         let isCommandDown = event.modifierFlags.contains(.command)
         handleCommandState(isCommandDown)
+        return false
     }
 
     private func handleCommandState(_ isCommandDown: Bool) {
@@ -171,7 +188,9 @@ private let modifierReleaseCallback: CGEventTapCallBack = { _, _, event, userInf
         let monitor = Unmanaged<ModifierReleaseMonitor>
             .fromOpaque(userInfo)
             .takeUnretainedValue()
-        monitor.handle(event: event)
+        if monitor.handle(event: event, type: event.type) {
+            return nil
+        }
     }
 
     return Unmanaged.passUnretained(event)

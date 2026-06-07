@@ -47,7 +47,7 @@ final class AppController: NSObject, NSApplicationDelegate {
             try hotKeyService?.start()
         } catch {
             panelController.model.statusText = String(describing: error)
-            panelController.show()
+            showPanel()
         }
 
         modifierReleaseMonitor?.start()
@@ -61,7 +61,7 @@ final class AppController: NSObject, NSApplicationDelegate {
     private func handleHotKey(_ direction: WindowCycleDirection) {
         if panelController.isVisible {
             panelController.model.moveSelection(direction)
-            panelController.show()
+            showPanel()
             return
         }
 
@@ -72,11 +72,11 @@ final class AppController: NSObject, NSApplicationDelegate {
         do {
             let windows = try axWindowService.currentApplicationWindows()
             panelController.model.setWindows(windows, direction: direction)
-            panelController.show()
+            showPanel()
         } catch {
             panelController.model.windows = []
             panelController.model.statusText = String(describing: error)
-            panelController.show()
+            showPanel()
         }
     }
 
@@ -84,7 +84,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         guard panelController.isVisible else {
             return
         }
-        panelController.hide()
+        hidePanel()
     }
 
     private func moveSelectionIfNeeded(_ direction: WindowCycleDirection) {
@@ -93,7 +93,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         }
 
         panelController.model.moveSelection(direction)
-        panelController.show()
+        showPanel()
     }
 
     private func activateSelectedWindowIfNeeded() {
@@ -102,7 +102,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         }
 
         defer {
-            panelController.hide()
+            hidePanel()
         }
 
         guard let window = panelController.model.selectedWindow else {
@@ -114,5 +114,15 @@ final class AppController: NSObject, NSApplicationDelegate {
         } catch {
             NSLog("WindowCycle activation failed: \(String(describing: error))")
         }
+    }
+
+    private func showPanel() {
+        panelController.show()
+        modifierReleaseMonitor?.setSwitcherVisible(true)
+    }
+
+    private func hidePanel() {
+        panelController.hide()
+        modifierReleaseMonitor?.setSwitcherVisible(false)
     }
 }
