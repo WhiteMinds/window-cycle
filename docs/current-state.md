@@ -8,11 +8,12 @@ Last updated: 2026-06-08
 
 - `Cmd + \`` opens the switcher and cycles forward.
 - `Cmd + Shift + \`` cycles backward.
+- Holding `Cmd + \`` or `Cmd + Shift + \`` continues moving the selection with macOS key repeat while the switcher is visible.
 - When opening forward, the focused/current window is placed first and the default selection moves to the second window when there is more than one window.
 - Releasing Command activates the selected window and hides the switcher.
 - `Esc` hides the switcher.
 - `Up` and `Down` move the selection while the switcher is visible.
-- `Up`, `Down`, and `Esc` are consumed by the event tap while the switcher is visible so the underlying app should not also receive them.
+- `Up`, `Down`, repeated grave key presses, and `Esc` are consumed by the event tap while the switcher is visible so the underlying app should not also receive them.
 - A menu bar status item provides Show, Hide, and Quit.
 - A permissions panel checks Accessibility and keyboard event tap availability and links to System Settings.
 - The switcher is a compact upper-screen floating panel, not centered.

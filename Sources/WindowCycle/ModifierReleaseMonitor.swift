@@ -122,24 +122,13 @@ final class ModifierReleaseMonitor {
         }
 
         if event.type == .keyDown, isSwitcherVisible {
-            switch Int(event.getIntegerValueField(.keyboardEventKeycode)) {
-            case kVK_Escape:
-                Task { @MainActor [onEscape] in
-                    onEscape()
-                }
+            let flags = event.flags
+            if handleSwitcherKeyDown(
+                keyCode: Int(event.getIntegerValueField(.keyboardEventKeycode)),
+                isCommandDown: flags.contains(.maskCommand),
+                isShiftDown: flags.contains(.maskShift)
+            ) {
                 return true
-            case kVK_UpArrow:
-                Task { @MainActor [onMoveSelection] in
-                    onMoveSelection(.previous)
-                }
-                return true
-            case kVK_DownArrow:
-                Task { @MainActor [onMoveSelection] in
-                    onMoveSelection(.next)
-                }
-                return true
-            default:
-                break
             }
         }
 
@@ -150,30 +139,49 @@ final class ModifierReleaseMonitor {
 
     private func handle(nsEvent event: NSEvent, canConsume: Bool) -> Bool {
         if event.type == .keyDown, canConsume, isSwitcherVisible {
-            switch Int(event.keyCode) {
-            case kVK_Escape:
-                Task { @MainActor [onEscape] in
-                    onEscape()
-                }
+            if handleSwitcherKeyDown(
+                keyCode: Int(event.keyCode),
+                isCommandDown: event.modifierFlags.contains(.command),
+                isShiftDown: event.modifierFlags.contains(.shift)
+            ) {
                 return true
-            case kVK_UpArrow:
-                Task { @MainActor [onMoveSelection] in
-                    onMoveSelection(.previous)
-                }
-                return true
-            case kVK_DownArrow:
-                Task { @MainActor [onMoveSelection] in
-                    onMoveSelection(.next)
-                }
-                return true
-            default:
-                break
             }
         }
 
         let isCommandDown = event.modifierFlags.contains(.command)
         handleCommandState(isCommandDown)
         return false
+    }
+
+    private func handleSwitcherKeyDown(
+        keyCode: Int,
+        isCommandDown: Bool,
+        isShiftDown: Bool
+    ) -> Bool {
+        switch keyCode {
+        case kVK_Escape:
+            Task { @MainActor [onEscape] in
+                onEscape()
+            }
+            return true
+        case kVK_UpArrow:
+            moveSelection(.previous)
+            return true
+        case kVK_DownArrow:
+            moveSelection(.next)
+            return true
+        case kVK_ANSI_Grave where isCommandDown:
+            moveSelection(isShiftDown ? .previous : .next)
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func moveSelection(_ direction: WindowCycleDirection) {
+        Task { @MainActor [onMoveSelection] in
+            onMoveSelection(direction)
+        }
     }
 
     private func handleCommandState(_ isCommandDown: Bool) {

@@ -83,6 +83,7 @@ Responsibilities:
 
 - detect Command release and trigger activation
 - consume `Up`, `Down`, and `Esc` when the switcher is visible
+- consume repeated grave key events while Command is held, using macOS key repeat to keep cycling
 - ignore navigation keys when the switcher is not visible
 - re-enable the event tap if macOS disables it after a timeout
 
