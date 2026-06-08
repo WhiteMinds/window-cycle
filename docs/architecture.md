@@ -33,6 +33,7 @@ Uses Accessibility APIs to:
 - enumerate current frontmost app windows via `kAXWindowsAttribute`
 - read the focused window via `kAXFocusedWindowAttribute`
 - move the focused window to the first list position
+- fall back to the app display name for installed browser web apps when `AXTitle` is empty
 - activate a selected window with `NSRunningApplication.activate` and `AXRaise`
 
 ### `SwitcherModel`
