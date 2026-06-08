@@ -2,7 +2,7 @@
 
 WindowCycle is a prototype macOS current-application window switcher:
 
-- `Cmd + \`` shows windows for the current frontmost app and cycles forward.
+- `Cmd + \`` starts switching windows for the current frontmost app and cycles forward.
 - `Cmd + Shift + \`` cycles backward.
 - Releasing Command activates the selected window when the event tap is available.
 - Escape hides the switcher.
@@ -97,8 +97,8 @@ Developer ID identity and add notarization separately.
 
 WindowCycle uses Accessibility APIs to read window metadata such as app names,
 window titles, frames, and minimized state. The event tap is used only for the
-configured switcher keys while the switcher is visible; keyboard input is not
-recorded or stored.
+configured switcher keys while a switcher session is active; keyboard input is
+not recorded or stored.
 
 ## Current Limitations
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-DEFAULT_MARKETING_VERSION="0.1.0"
+DEFAULT_MARKETING_VERSION="0.1.1"
 if [[ -f "$ROOT_DIR/VERSION" ]]; then
   DEFAULT_MARKETING_VERSION="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 fi

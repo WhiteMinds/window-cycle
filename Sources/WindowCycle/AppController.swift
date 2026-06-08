@@ -2,6 +2,8 @@ import AppKit
 
 @MainActor
 final class AppController: NSObject, NSApplicationDelegate {
+    private static let delayedPanelShowNanoseconds: UInt64 = 125_000_000
+
     private let axWindowService = AXWindowService()
     private lazy var panelController = SwitcherPanelController(
         onActivateSelected: { [weak self] in
@@ -12,6 +14,8 @@ final class AppController: NSObject, NSApplicationDelegate {
     private var modifierReleaseMonitor: ModifierReleaseMonitor?
     private var statusItemController: StatusItemController?
     private var permissionPanelController: PermissionPanelController?
+    private var pendingPanelShowTask: Task<Void, Never>?
+    private var isSwitcherActive = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -38,7 +42,7 @@ final class AppController: NSObject, NSApplicationDelegate {
 
         statusItemController = StatusItemController(
             onShowWindows: { [weak self] in
-                self?.showSwitcher(.next)
+                self?.showSwitcher(.next, delayed: false)
             },
             onShowPermissions: { [weak self] in
                 self?.showPermissions()
@@ -55,6 +59,8 @@ final class AppController: NSObject, NSApplicationDelegate {
             try hotKeyService?.start()
         } catch {
             panelController.model.statusText = String(describing: error)
+            beginSwitcher()
+            cancelPendingPanelShow()
             showPanel()
         }
 
@@ -77,50 +83,65 @@ final class AppController: NSObject, NSApplicationDelegate {
     }
 
     private func handleHotKey(_ direction: WindowCycleDirection) {
-        if panelController.isVisible {
+        if isSwitcherActive {
             panelController.model.moveSelection(direction)
-            showPanel()
+            if panelController.isVisible {
+                showPanel()
+            }
             return
         }
 
-        showSwitcher(direction)
+        showSwitcher(direction, delayed: true)
     }
 
-    private func showSwitcher(_ direction: WindowCycleDirection) {
+    private func showSwitcher(_ direction: WindowCycleDirection, delayed: Bool) {
         do {
             let windows = try axWindowService.currentApplicationWindows()
             panelController.model.setWindows(windows, direction: direction)
-            showPanel()
+            beginSwitcher()
+
+            if delayed {
+                schedulePanelShow()
+            } else {
+                cancelPendingPanelShow()
+                showPanel()
+            }
         } catch {
             panelController.model.windows = []
             panelController.model.statusText = String(describing: error)
+            beginSwitcher()
+            cancelPendingPanelShow()
             showPanel()
         }
     }
 
     private func cancelSwitcher() {
-        guard panelController.isVisible else {
+        guard isSwitcherActive || panelController.isVisible || pendingPanelShowTask != nil else {
             return
         }
-        hidePanel()
+
+        finishSwitcher()
     }
 
     private func moveSelectionIfNeeded(_ direction: WindowCycleDirection) {
-        guard panelController.isVisible else {
+        guard isSwitcherActive else {
             return
         }
 
         panelController.model.moveSelection(direction)
-        showPanel()
+        if panelController.isVisible {
+            showPanel()
+        }
     }
 
     private func activateSelectedWindowIfNeeded() {
-        guard panelController.isVisible else {
+        guard isSwitcherActive else {
             return
         }
 
+        cancelPendingPanelShow()
         defer {
-            hidePanel()
+            finishSwitcher()
         }
 
         guard let window = panelController.model.selectedWindow else {
@@ -151,13 +172,47 @@ final class AppController: NSObject, NSApplicationDelegate {
         )
     }
 
+    private func beginSwitcher() {
+        isSwitcherActive = true
+        modifierReleaseMonitor?.setSwitcherActive(true)
+    }
+
+    private func finishSwitcher() {
+        cancelPendingPanelShow()
+        isSwitcherActive = false
+        hidePanel()
+        modifierReleaseMonitor?.setSwitcherActive(false)
+    }
+
+    private func schedulePanelShow() {
+        cancelPendingPanelShow()
+
+        pendingPanelShowTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: Self.delayedPanelShowNanoseconds)
+            } catch {
+                return
+            }
+
+            guard let self, self.isSwitcherActive, !self.panelController.isVisible else {
+                return
+            }
+
+            self.pendingPanelShowTask = nil
+            self.showPanel()
+        }
+    }
+
+    private func cancelPendingPanelShow() {
+        pendingPanelShowTask?.cancel()
+        pendingPanelShowTask = nil
+    }
+
     private func showPanel() {
         panelController.show()
-        modifierReleaseMonitor?.setSwitcherVisible(true)
     }
 
     private func hidePanel() {
         panelController.hide()
-        modifierReleaseMonitor?.setSwitcherVisible(false)
     }
 }

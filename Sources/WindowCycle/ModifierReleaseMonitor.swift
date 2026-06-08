@@ -12,7 +12,7 @@ final class ModifierReleaseMonitor {
     private var globalMonitor: Any?
     private var localMonitor: Any?
     private var wasCommandDown = false
-    private var isSwitcherVisible = false
+    private var isSwitcherActive = false
 
     var isEventTapActive: Bool {
         eventTap != nil
@@ -62,11 +62,11 @@ final class ModifierReleaseMonitor {
         runLoopSource = nil
         eventTap = nil
         wasCommandDown = false
-        isSwitcherVisible = false
+        isSwitcherActive = false
     }
 
-    func setSwitcherVisible(_ isVisible: Bool) {
-        isSwitcherVisible = isVisible
+    func setSwitcherActive(_ isActive: Bool) {
+        isSwitcherActive = isActive
     }
 
     private func startNSEventMonitors() {
@@ -121,7 +121,7 @@ final class ModifierReleaseMonitor {
             return false
         }
 
-        if event.type == .keyDown, isSwitcherVisible {
+        if event.type == .keyDown, isSwitcherActive {
             let flags = event.flags
             if handleSwitcherKeyDown(
                 keyCode: Int(event.getIntegerValueField(.keyboardEventKeycode)),
@@ -138,7 +138,7 @@ final class ModifierReleaseMonitor {
     }
 
     private func handle(nsEvent event: NSEvent, canConsume: Bool) -> Bool {
-        if event.type == .keyDown, canConsume, isSwitcherVisible {
+        if event.type == .keyDown, canConsume, isSwitcherActive {
             if handleSwitcherKeyDown(
                 keyCode: Int(event.keyCode),
                 isCommandDown: event.modifierFlags.contains(.command),

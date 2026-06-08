@@ -35,5 +35,5 @@ Last updated: 2026-06-08
 
 - Add a README privacy section:
   - no keystroke recording
-  - event tap only reacts to configured shortcuts and navigation keys while the switcher is visible
+  - event tap only reacts to configured shortcuts and navigation keys while a switcher session is active
   - no network behavior unless an updater is later added

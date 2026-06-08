@@ -14,7 +14,8 @@ Owns the app lifecycle and wires services together:
 - starts event monitoring
 - shows and hides the switcher panel
 - activates the selected window
-- keeps `ModifierReleaseMonitor` informed about whether the switcher is visible, so keyboard events are only consumed while needed
+- keeps `ModifierReleaseMonitor` informed about whether a switcher session is active, so keyboard events are only consumed while needed
+- delays initial panel presentation by about 125ms, allowing quick press/release switching without a visible panel flash
 
 ### `HotKeyService`
 
@@ -84,9 +85,9 @@ Uses:
 Responsibilities:
 
 - detect Command release and trigger activation
-- consume `Up`, `Down`, and `Esc` when the switcher is visible
+- consume `Up`, `Down`, and `Esc` when a switcher session is active
 - consume repeated grave key events while Command is held, using macOS key repeat to keep cycling
-- ignore navigation keys when the switcher is not visible
+- ignore navigation keys when no switcher session is active
 - re-enable the event tap if macOS disables it after a timeout
 
 ### `PermissionPanelController`

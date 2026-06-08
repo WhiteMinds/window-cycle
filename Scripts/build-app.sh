@@ -5,12 +5,12 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_CONFIGURATION="${BUILD_CONFIGURATION:-debug}"
 APP_DIR="${APP_DIR:-$ROOT_DIR/.build/WindowCycle.app}"
 BUNDLE_IDENTIFIER="${BUNDLE_IDENTIFIER:-app.windowcycle.WindowCycle}"
-DEFAULT_MARKETING_VERSION="0.1.0"
+DEFAULT_MARKETING_VERSION="0.1.1"
 if [[ -f "$ROOT_DIR/VERSION" ]]; then
   DEFAULT_MARKETING_VERSION="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 fi
 MARKETING_VERSION="${MARKETING_VERSION:-$DEFAULT_MARKETING_VERSION}"
-BUILD_VERSION="${BUILD_VERSION:-1}"
+BUILD_VERSION="${BUILD_VERSION:-2}"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
@@ -54,9 +54,9 @@ cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.1.0</string>
+  <string>0.1.1</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>2</string>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
   <key>LSUIElement</key>

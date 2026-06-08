@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 - 2026-06-08
+
+- Delay initial panel display briefly so quick press/release switching does not flash the UI.
+
 ## 0.1.0 - 2026-06-08
 
 - Initial public prototype.
