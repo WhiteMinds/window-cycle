@@ -34,6 +34,7 @@ swift build
 Scripts/build-app.sh
 Scripts/build-release.sh
 Scripts/build-dmg.sh
+Scripts/install-local.sh
 open .build/WindowCycle.app
 pkill -x WindowCycle
 ```
@@ -49,6 +50,8 @@ open Package.swift
 - Accessibility is required for AX window enumeration and `AXRaise`.
 - Input Monitoring may be required for the active `CGEvent` tap that consumes arrow/Escape key events.
 - If arrow navigation stops working or stops being consumed, check Input Monitoring first.
+- For local permission testing, prefer `Scripts/install-local.sh` so the signed app is installed, registered, and launched from `/Applications`.
+- If System Settings does not list the app automatically, use the `+` button in the relevant privacy list and choose `WindowCycle.app` from Applications.
 - The local self-signed certificate helps preserve TCC permissions on this machine across rebuilds.
 
 ## Release Outputs

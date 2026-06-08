@@ -92,6 +92,7 @@ It shows:
 - Accessibility status
 - keyboard event tap availability as the practical Input Monitoring indicator
 - buttons that open the relevant System Settings panes
+- a Finder reveal action for manually adding the installed app when System Settings does not auto-list it
 - a refresh action that re-checks Accessibility and restarts the event tap
 
 ### Release Scripts
@@ -99,6 +100,7 @@ It shows:
 - `Scripts/build-app.sh`: builds and signs a local `.app`; configurable via environment variables.
 - `Scripts/build-release.sh`: builds `dist/WindowCycle.app` with release configuration.
 - `Scripts/build-dmg.sh`: builds `dist/WindowCycle-<version>.dmg` with the app and an Applications symlink.
+- `Scripts/install-local.sh`: builds the release app, copies it to `/Applications`, registers it with Launch Services, and launches it.
 - `Scripts/generate-app-icon.swift`: generates `Resources/AppIcon.icns`.
 
 ## Current Limitations

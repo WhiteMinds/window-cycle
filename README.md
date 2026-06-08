@@ -52,7 +52,7 @@ The bundle sets `LSUIElement = true`, so it behaves like an agent app without a 
 Use the menu bar icon to quit the app if the switcher panel gets stuck.
 
 The build script signs the app bundle with the stable bundle identifier
-`dev.local.WindowCycle`. On this machine it uses the local self-signed identity
+`app.windowcycle.WindowCycle`. On this machine it uses the local self-signed identity
 `WindowCycle Local Code Signing` when available, and falls back to ad-hoc signing
 otherwise:
 
@@ -70,6 +70,17 @@ macOS privacy permissions are tied to code identity, not just the visible app
 name. With ad-hoc signing, code changes can still produce a new identity, so an
 older enabled `WindowCycle` entry in Accessibility may not match a freshly
 rebuilt app.
+
+For local permission testing, install and launch the release app from
+`/Applications`:
+
+```sh
+Scripts/install-local.sh
+```
+
+If WindowCycle does not appear automatically in System Settings, use the `+`
+button in the Accessibility or Input Monitoring list and choose
+`WindowCycle.app` from Applications.
 
 ## Build A Release App And DMG
 

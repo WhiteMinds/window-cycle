@@ -11,6 +11,14 @@ The app needs macOS privacy permissions:
 
 TCC permissions are tied to code identity, not just app name. A rebuilt app may lose permission matching if its code identity changes.
 
+For local testing, prefer installing and launching the signed release app from `/Applications`:
+
+```sh
+Scripts/install-local.sh
+```
+
+If System Settings does not list WindowCycle automatically after the app requests permission, add it manually with the `+` button in the Accessibility or Input Monitoring list and choose `WindowCycle.app` from Applications.
+
 ## Local Self-Signed Signing
 
 This machine has a local self-signed code signing identity:
@@ -90,6 +98,7 @@ Consider Developer ID only after the app has enough real users to justify the ye
 ```sh
 Scripts/build-release.sh
 Scripts/build-dmg.sh
+Scripts/install-local.sh
 ```
 
 Release outputs:

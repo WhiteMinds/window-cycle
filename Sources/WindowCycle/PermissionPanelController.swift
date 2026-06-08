@@ -28,7 +28,7 @@ final class PermissionPanelController {
 
     private lazy var panel: NSPanel = {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 460, height: 280),
+            contentRect: NSRect(x: 0, y: 0, width: 520, height: 340),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -99,7 +99,16 @@ private struct PermissionView: View {
                 }
             )
 
+            Text("If WindowCycle is missing from System Settings, click + in that privacy list and choose WindowCycle.app from Applications.")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
             HStack {
+                Button("Show App in Finder") {
+                    revealAppInFinder()
+                }
+
                 Button("Refresh") {
                     onRefresh()
                 }
@@ -113,7 +122,7 @@ private struct PermissionView: View {
             }
         }
         .padding(20)
-        .frame(width: 460)
+        .frame(width: 520)
     }
 
     private func openPrivacyPane(_ anchor: String) {
@@ -121,6 +130,10 @@ private struct PermissionView: View {
             return
         }
         NSWorkspace.shared.open(url)
+    }
+
+    private func revealAppInFinder() {
+        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
     }
 }
 

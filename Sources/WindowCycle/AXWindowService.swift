@@ -30,6 +30,8 @@ final class AXWindowService {
     }
 
     func requestAccessibilityIfNeeded() -> Bool {
+        // String value of kAXTrustedCheckOptionPrompt; using the literal avoids
+        // Swift 6 concurrency warnings for the C global.
         let promptKey = "AXTrustedCheckOptionPrompt"
         let options = [promptKey: true] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
