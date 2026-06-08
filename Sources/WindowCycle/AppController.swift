@@ -7,11 +7,12 @@ final class AppController: NSObject, NSApplicationDelegate {
     private var hotKeyService: HotKeyService?
     private var modifierReleaseMonitor: ModifierReleaseMonitor?
     private var statusItemController: StatusItemController?
+    private var permissionPanelController: PermissionPanelController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
-        _ = axWindowService.requestAccessibilityIfNeeded()
+        let accessibilityTrusted = axWindowService.requestAccessibilityIfNeeded()
 
         hotKeyService = HotKeyService { [weak self] direction in
             Task { @MainActor in
@@ -35,6 +36,9 @@ final class AppController: NSObject, NSApplicationDelegate {
             onShowWindows: { [weak self] in
                 self?.showSwitcher(.next)
             },
+            onShowPermissions: { [weak self] in
+                self?.showPermissions()
+            },
             onHideSwitcher: { [weak self] in
                 self?.cancelSwitcher()
             },
@@ -51,6 +55,16 @@ final class AppController: NSObject, NSApplicationDelegate {
         }
 
         modifierReleaseMonitor?.start()
+
+        permissionPanelController = PermissionPanelController(
+            onRefresh: { [weak self] in
+                self?.refreshPermissions()
+            }
+        )
+
+        if !accessibilityTrusted || !(modifierReleaseMonitor?.isEventTapActive ?? false) {
+            showPermissions()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -114,6 +128,23 @@ final class AppController: NSObject, NSApplicationDelegate {
         } catch {
             NSLog("WindowCycle activation failed: \(String(describing: error))")
         }
+    }
+
+    private func showPermissions() {
+        permissionPanelController?.show(currentPermissionSnapshot())
+    }
+
+    private func refreshPermissions() {
+        _ = axWindowService.requestAccessibilityIfNeeded()
+        modifierReleaseMonitor?.start()
+        permissionPanelController?.update(currentPermissionSnapshot())
+    }
+
+    private func currentPermissionSnapshot() -> PermissionSnapshot {
+        PermissionSnapshot(
+            accessibilityGranted: axWindowService.isAccessibilityTrusted(),
+            keyboardEventsGranted: modifierReleaseMonitor?.isEventTapActive ?? false
+        )
     }
 
     private func showPanel() {

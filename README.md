@@ -71,6 +71,17 @@ name. With ad-hoc signing, code changes can still produce a new identity, so an
 older enabled `WindowCycle` entry in Accessibility may not match a freshly
 rebuilt app.
 
+## Build A Release App And DMG
+
+```sh
+Scripts/build-release.sh
+Scripts/build-dmg.sh
+```
+
+Release outputs are written to `dist/`, which is intentionally git-ignored.
+The DMG is self-signed/not notarized unless you override signing with a
+Developer ID identity and add notarization separately.
+
 ## Current Limitations
 
 - No settings UI yet.
@@ -78,6 +89,7 @@ rebuilt app.
 - Cross-Space and full-screen behavior is not handled with private CGS/SLS APIs.
 - Window sorting is currently AX order, not CGWindow z-order.
 - Keyboard conflict handling is not polished.
+- The current DMG is not notarized.
 
 ## Docs
 

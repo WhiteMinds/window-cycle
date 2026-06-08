@@ -83,11 +83,29 @@ Responsibilities:
 - ignore navigation keys when the switcher is not visible
 - re-enable the event tap if macOS disables it after a timeout
 
+### `PermissionPanelController`
+
+Owns the lightweight permissions onboarding panel.
+
+It shows:
+
+- Accessibility status
+- keyboard event tap availability as the practical Input Monitoring indicator
+- buttons that open the relevant System Settings panes
+- a refresh action that re-checks Accessibility and restarts the event tap
+
+### Release Scripts
+
+- `Scripts/build-app.sh`: builds and signs a local `.app`; configurable via environment variables.
+- `Scripts/build-release.sh`: builds `dist/WindowCycle.app` with release configuration.
+- `Scripts/build-dmg.sh`: builds `dist/WindowCycle-<version>.dmg` with the app and an Applications symlink.
+- `Scripts/generate-app-icon.swift`: generates `Resources/AppIcon.icns`.
+
 ## Current Limitations
 
 - No AXObserver cache yet; windows are refreshed when the switcher opens.
 - No settings UI.
-- No DMG/release automation yet.
 - No cross-Space/full-screen private API behavior.
 - Window ordering is focused-first plus AX order, not a full recent/z-order model.
 - Input Monitoring onboarding is not polished.
+- DMG is not notarized.

@@ -25,6 +25,10 @@ enum AXWindowServiceError: Error, CustomStringConvertible {
 }
 
 final class AXWindowService {
+    func isAccessibilityTrusted() -> Bool {
+        AXIsProcessTrusted()
+    }
+
     func requestAccessibilityIfNeeded() -> Bool {
         let promptKey = "AXTrustedCheckOptionPrompt"
         let options = [promptKey: true] as CFDictionary

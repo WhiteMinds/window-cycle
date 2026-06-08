@@ -14,6 +14,10 @@ final class ModifierReleaseMonitor {
     private var wasCommandDown = false
     private var isSwitcherVisible = false
 
+    var isEventTapActive: Bool {
+        eventTap != nil
+    }
+
     init(
         onCommandReleased: @escaping @MainActor () -> Void,
         onEscape: @escaping @MainActor () -> Void,

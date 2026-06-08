@@ -2,9 +2,16 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-APP_DIR="$ROOT_DIR/.build/WindowCycle.app"
+BUILD_CONFIGURATION="${BUILD_CONFIGURATION:-debug}"
+APP_DIR="${APP_DIR:-$ROOT_DIR/.build/WindowCycle.app}"
+BUNDLE_IDENTIFIER="${BUNDLE_IDENTIFIER:-app.windowcycle.WindowCycle}"
+MARKETING_VERSION="${MARKETING_VERSION:-0.1.0}"
+BUILD_VERSION="${BUILD_VERSION:-1}"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
+RESOURCES_DIR="$CONTENTS_DIR/Resources"
+ENTITLEMENTS_FILE="$ROOT_DIR/Resources/WindowCycle.entitlements"
+ICON_FILE="$ROOT_DIR/Resources/AppIcon.icns"
 LOCAL_CODESIGN_IDENTITY="WindowCycle Local Code Signing"
 CODESIGN_IDENTITY="${CODESIGN_IDENTITY:-}"
 
@@ -17,12 +24,16 @@ if [[ -z "$CODESIGN_IDENTITY" ]]; then
 fi
 
 cd "$ROOT_DIR"
-swift build -c debug
+swift build -c "$BUILD_CONFIGURATION"
 
 rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR"
+mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
-cp "$ROOT_DIR/.build/debug/WindowCycle" "$MACOS_DIR/WindowCycle"
+cp "$ROOT_DIR/.build/$BUILD_CONFIGURATION/WindowCycle" "$MACOS_DIR/WindowCycle"
+
+if [[ -f "$ICON_FILE" ]]; then
+  cp "$ICON_FILE" "$RESOURCES_DIR/AppIcon.icns"
+fi
 
 cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -52,6 +63,26 @@ cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
-codesign --force --sign "$CODESIGN_IDENTITY" --identifier dev.local.WindowCycle "$APP_DIR"
+plutil -replace CFBundleIdentifier -string "$BUNDLE_IDENTIFIER" "$CONTENTS_DIR/Info.plist"
+plutil -replace CFBundleShortVersionString -string "$MARKETING_VERSION" "$CONTENTS_DIR/Info.plist"
+plutil -replace CFBundleVersion -string "$BUILD_VERSION" "$CONTENTS_DIR/Info.plist"
+plutil -insert CFBundleDisplayName -string "WindowCycle" "$CONTENTS_DIR/Info.plist"
+plutil -insert CFBundleIconFile -string "AppIcon" "$CONTENTS_DIR/Info.plist"
+plutil -insert LSApplicationCategoryType -string "public.app-category.utilities" "$CONTENTS_DIR/Info.plist"
+plutil -insert NSHighResolutionCapable -bool true "$CONTENTS_DIR/Info.plist"
 
-echo "Built $APP_DIR with signing identity: $CODESIGN_IDENTITY"
+codesign_args=(
+  --force
+  --sign "$CODESIGN_IDENTITY"
+  --identifier "$BUNDLE_IDENTIFIER"
+  --options runtime
+)
+
+if [[ -f "$ENTITLEMENTS_FILE" ]]; then
+  codesign_args+=(--entitlements "$ENTITLEMENTS_FILE")
+fi
+
+codesign "${codesign_args[@]}" "$APP_DIR"
+codesign --verify --strict --verbose=2 "$APP_DIR"
+
+echo "Built $APP_DIR ($BUILD_CONFIGURATION) with signing identity: $CODESIGN_IDENTITY"

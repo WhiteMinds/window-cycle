@@ -15,6 +15,8 @@ Keep the scope focused on current-app window switching unless explicitly request
 ```sh
 swift build
 Scripts/build-app.sh
+Scripts/build-release.sh
+Scripts/build-dmg.sh
 open .build/WindowCycle.app
 pkill -x WindowCycle
 ```
@@ -27,6 +29,7 @@ The build script uses `WindowCycle Local Code Signing` when available and falls 
 - `HotKeyService.swift`: Carbon hotkeys
 - `AXWindowService.swift`: Accessibility window enumeration/activation
 - `ModifierReleaseMonitor.swift`: Command release, Escape, arrow navigation, event consumption
+- `PermissionPanelController.swift`: permissions onboarding panel
 - `SwitcherPanelController.swift`: AppKit `NSPanel`
 - `SwitcherView.swift`: SwiftUI list content
 
@@ -40,6 +43,7 @@ Read `docs/current-state.md` and `docs/architecture.md` before making changes.
 - Keep the app lightweight and agent-style (`LSUIElement = true`).
 - After code changes, run `swift build`.
 - After app bundle/signing changes, run `Scripts/build-app.sh`.
+- After release script changes, run `Scripts/build-release.sh` and `Scripts/build-dmg.sh`.
 - If the app is already running, restart it with `pkill -x WindowCycle` then `open .build/WindowCycle.app`.
 
 ## UX Notes

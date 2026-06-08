@@ -14,21 +14,26 @@ Last updated: 2026-06-08
 - `Up` and `Down` move the selection while the switcher is visible.
 - `Up`, `Down`, and `Esc` are consumed by the event tap while the switcher is visible so the underlying app should not also receive them.
 - A menu bar status item provides Show, Hide, and Quit.
+- A permissions panel checks Accessibility and keyboard event tap availability and links to System Settings.
 - The switcher is a compact upper-screen floating panel, not centered.
 
 ## Current Project Shape
 
 - Swift package executable target: `WindowCycle`
 - Bundle path: `.build/WindowCycle.app`
-- Bundle identifier: `dev.local.WindowCycle`
+- Bundle identifier: `app.windowcycle.WindowCycle`
 - Local signing identity: `WindowCycle Local Code Signing`
 - App type: `LSUIElement = true` agent app
+- App icon: `Resources/AppIcon.icns`
+- Entitlements: `Resources/WindowCycle.entitlements`
 
 ## Important Commands
 
 ```sh
 swift build
 Scripts/build-app.sh
+Scripts/build-release.sh
+Scripts/build-dmg.sh
 open .build/WindowCycle.app
 pkill -x WindowCycle
 ```
@@ -45,3 +50,10 @@ open Package.swift
 - Input Monitoring may be required for the active `CGEvent` tap that consumes arrow/Escape key events.
 - If arrow navigation stops working or stops being consumed, check Input Monitoring first.
 - The local self-signed certificate helps preserve TCC permissions on this machine across rebuilds.
+
+## Release Outputs
+
+- Release app: `dist/WindowCycle.app`
+- DMG: `dist/WindowCycle-0.1.0.dmg`
+- `dist/` is git-ignored.
+- The current DMG is self-signed/not notarized.

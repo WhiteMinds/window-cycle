@@ -9,6 +9,8 @@
 ```sh
 swift build
 Scripts/build-app.sh
+Scripts/build-release.sh
+Scripts/build-dmg.sh
 open .build/WindowCycle.app
 ```
 
@@ -40,6 +42,7 @@ open Package.swift
 - Accessibility is required for AX APIs.
 - Input Monitoring may be required for the active event tap.
 - Local development uses the self-signed identity `WindowCycle Local Code Signing`.
+- Release outputs are written to `dist/`.
 
 ## Files to Read First
 

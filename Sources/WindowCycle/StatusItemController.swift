@@ -4,16 +4,19 @@ import AppKit
 final class StatusItemController: NSObject {
     private let statusItem: NSStatusItem
     private let onShowWindows: () -> Void
+    private let onShowPermissions: () -> Void
     private let onHideSwitcher: () -> Void
     private let onQuit: () -> Void
 
     init(
         onShowWindows: @escaping () -> Void,
+        onShowPermissions: @escaping () -> Void,
         onHideSwitcher: @escaping () -> Void,
         onQuit: @escaping () -> Void
     ) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         self.onShowWindows = onShowWindows
+        self.onShowPermissions = onShowPermissions
         self.onHideSwitcher = onHideSwitcher
         self.onQuit = onQuit
         super.init()
@@ -40,6 +43,11 @@ final class StatusItemController: NSObject {
             action: #selector(hideSwitcher),
             keyEquivalent: ""
         ))
+        menu.addItem(NSMenuItem(
+            title: "Permissions...",
+            action: #selector(showPermissions),
+            keyEquivalent: ""
+        ))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(
             title: "Quit WindowCycle",
@@ -62,8 +70,11 @@ final class StatusItemController: NSObject {
         onHideSwitcher()
     }
 
+    @objc private func showPermissions() {
+        onShowPermissions()
+    }
+
     @objc private func quit() {
         onQuit()
     }
 }
-

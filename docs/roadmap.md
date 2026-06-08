@@ -4,11 +4,8 @@ Last updated: 2026-06-08
 
 ## Near-Term Fixes
 
-- Add an in-app permission/status panel for Accessibility and Input Monitoring.
-- Add buttons to open the relevant System Settings panes.
 - Add diagnostics for event tap creation failure.
 - Add a visible empty/no-windows state that fits the compact UI.
-- Add a real app icon.
 - Add configurable shortcuts.
 
 ## Window Behavior
@@ -29,10 +26,10 @@ Last updated: 2026-06-08
 
 ## Packaging
 
-- Add a release script that builds a release `.app`.
-- Add optional DMG generation.
 - Keep local self-signed signing for development.
 - Document GitHub release caveats if distributing without Developer ID.
+- Improve DMG presentation with a background and layout.
+- Add optional notarization support for Developer ID users.
 
 ## Privacy/Trust
 
