@@ -9,8 +9,12 @@ struct AppWindow: Identifiable {
     let appIcon: NSImage?
     let axElement: AXUIElement
     var title: String
+    var subrole: String
     var frame: CGRect
     var isMinimized: Bool
+    var isModal: Bool
+    var isMain: Bool
+    var isFocused: Bool
     var indexHint: Int
 }
 

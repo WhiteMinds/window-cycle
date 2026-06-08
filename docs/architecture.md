@@ -32,8 +32,10 @@ Uses Accessibility APIs to:
 - request/check Accessibility trust
 - enumerate current frontmost app windows via `kAXWindowsAttribute`
 - read the focused window via `kAXFocusedWindowAttribute`
+- batch-read role, subrole, title, position, size, minimized, modal, main, and focused attributes for each window
 - move the focused window to the first list position
 - fall back to the app display name when `AXTitle` is empty
+- skip non-minimized windows whose frame is clearly non-renderable
 - activate a selected window with `NSRunningApplication.activate` and `AXRaise`
 
 ### `SwitcherModel`

@@ -93,15 +93,12 @@ final class AXWindowService {
         application: NSRunningApplication,
         index: Int
     ) -> AppWindow? {
-        let role = readStringAttribute(kAXRoleAttribute as String, from: element)
-        guard role == kAXWindowRole else {
+        let snapshot = readWindowSnapshot(from: element)
+        guard snapshot.role == kAXWindowRole,
+              shouldIncludeWindow(snapshot)
+        else {
             return nil
         }
-
-        let rawTitle = readStringAttribute(kAXTitleAttribute as String, from: element)
-
-        let frame = readFrame(from: element) ?? .zero
-        let minimized = readBoolAttribute(kAXMinimizedAttribute as String, from: element) ?? false
 
         return AppWindow(
             pid: application.processIdentifier,
@@ -109,11 +106,23 @@ final class AXWindowService {
             bundleIdentifier: application.bundleIdentifier,
             appIcon: application.icon,
             axElement: element,
-            title: resolveWindowTitle(rawTitle, application: application),
-            frame: frame,
-            isMinimized: minimized,
+            title: resolveWindowTitle(snapshot.title, application: application),
+            subrole: snapshot.subrole,
+            frame: snapshot.frame ?? .zero,
+            isMinimized: snapshot.isMinimized,
+            isModal: snapshot.isModal,
+            isMain: snapshot.isMain,
+            isFocused: snapshot.isFocused,
             indexHint: index
         )
+    }
+
+    private func shouldIncludeWindow(_ snapshot: WindowAttributeSnapshot) -> Bool {
+        guard !snapshot.isMinimized, let frame = snapshot.frame else {
+            return true
+        }
+
+        return frame.width >= 2 && frame.height >= 2
     }
 
     private func resolveWindowTitle(_ rawTitle: String, application: NSRunningApplication) -> String {
@@ -128,6 +137,32 @@ final class AXWindowService {
         }
 
         return "Untitled Window"
+    }
+
+    private func readWindowSnapshot(from element: AXUIElement) -> WindowAttributeSnapshot {
+        let attributes = WindowAttributeSnapshot.attributeNames
+        var rawValues: CFArray?
+        let error = AXUIElementCopyMultipleAttributeValues(
+            element,
+            attributes as CFArray,
+            AXCopyMultipleAttributeOptions(rawValue: 0),
+            &rawValues
+        )
+
+        guard error == .success, let values = rawValues as? [Any] else {
+            return WindowAttributeSnapshot(
+                role: readStringAttribute(kAXRoleAttribute as String, from: element),
+                subrole: readStringAttribute(kAXSubroleAttribute as String, from: element),
+                title: readStringAttribute(kAXTitleAttribute as String, from: element),
+                frame: readFrame(from: element),
+                isMinimized: readBoolAttribute(kAXMinimizedAttribute as String, from: element) ?? false,
+                isModal: readBoolAttribute(kAXModalAttribute as String, from: element) ?? false,
+                isMain: readBoolAttribute(kAXMainAttribute as String, from: element) ?? false,
+                isFocused: readBoolAttribute(kAXFocusedAttribute as String, from: element) ?? false
+            )
+        }
+
+        return WindowAttributeSnapshot(values: values)
     }
 
     private func orderWindows(_ windows: [AppWindow], focusedWindow: AXUIElement?) -> [AppWindow] {
@@ -235,5 +270,122 @@ final class AXWindowService {
             return nil
         }
         return size
+    }
+}
+
+private struct WindowAttributeSnapshot {
+    static let attributeNames = [
+        kAXRoleAttribute as String,
+        kAXSubroleAttribute as String,
+        kAXTitleAttribute as String,
+        kAXPositionAttribute as String,
+        kAXSizeAttribute as String,
+        kAXMinimizedAttribute as String,
+        kAXModalAttribute as String,
+        kAXMainAttribute as String,
+        kAXFocusedAttribute as String
+    ]
+
+    let role: String
+    let subrole: String
+    let title: String
+    let frame: CGRect?
+    let isMinimized: Bool
+    let isModal: Bool
+    let isMain: Bool
+    let isFocused: Bool
+
+    init(
+        role: String,
+        subrole: String,
+        title: String,
+        frame: CGRect?,
+        isMinimized: Bool,
+        isModal: Bool,
+        isMain: Bool,
+        isFocused: Bool
+    ) {
+        self.role = role
+        self.subrole = subrole
+        self.title = title
+        self.frame = frame
+        self.isMinimized = isMinimized
+        self.isModal = isModal
+        self.isMain = isMain
+        self.isFocused = isFocused
+    }
+
+    init(values: [Any]) {
+        let position = Self.pointValue(values[safe: 3])
+        let size = Self.sizeValue(values[safe: 4])
+        let frame = position.flatMap { position in
+            size.map { size in
+                CGRect(origin: position, size: size)
+            }
+        }
+
+        self.init(
+            role: Self.stringValue(values[safe: 0]),
+            subrole: Self.stringValue(values[safe: 1]),
+            title: Self.stringValue(values[safe: 2]),
+            frame: frame,
+            isMinimized: Self.boolValue(values[safe: 5]),
+            isModal: Self.boolValue(values[safe: 6]),
+            isMain: Self.boolValue(values[safe: 7]),
+            isFocused: Self.boolValue(values[safe: 8])
+        )
+    }
+
+    private static func stringValue(_ value: Any?) -> String {
+        value as? String ?? ""
+    }
+
+    private static func boolValue(_ value: Any?) -> Bool {
+        if let bool = value as? Bool {
+            return bool
+        }
+
+        if let number = value as? NSNumber {
+            return number.boolValue
+        }
+
+        return false
+    }
+
+    private static func pointValue(_ value: Any?) -> CGPoint? {
+        guard let axValue = axValue(value), AXValueGetType(axValue) == .cgPoint else {
+            return nil
+        }
+
+        var point = CGPoint.zero
+        return AXValueGetValue(axValue, .cgPoint, &point) ? point : nil
+    }
+
+    private static func sizeValue(_ value: Any?) -> CGSize? {
+        guard let axValue = axValue(value), AXValueGetType(axValue) == .cgSize else {
+            return nil
+        }
+
+        var size = CGSize.zero
+        return AXValueGetValue(axValue, .cgSize, &size) ? size : nil
+    }
+
+    private static func axValue(_ value: Any?) -> AXValue? {
+        guard let value, !(value is NSNull) else {
+            return nil
+        }
+
+        let cfValue = value as CFTypeRef
+        guard CFGetTypeID(cfValue) == AXValueGetTypeID() else {
+            return nil
+        }
+
+        return (cfValue as! AXValue)
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

@@ -17,6 +17,8 @@ Last updated: 2026-06-08
 - A permissions panel checks Accessibility and keyboard event tap availability and links to System Settings.
 - The switcher is a compact upper-screen floating panel, not centered.
 - Empty AX window titles use the app display name as a fallback for cases like installed browser web apps.
+- Window metadata is read with batched AX attributes and keeps subrole, modal, main, focused, minimized, and frame state.
+- Non-minimized windows with clearly non-renderable frames are filtered out.
 
 ## Current Project Shape
 
