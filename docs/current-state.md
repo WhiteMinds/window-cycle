@@ -16,7 +16,7 @@ Last updated: 2026-06-08
 - A menu bar status item provides Show, Hide, and Quit.
 - A permissions panel checks Accessibility and keyboard event tap availability and links to System Settings.
 - The switcher is a compact upper-screen floating panel, not centered.
-- Installed browser web apps use the app display name as a fallback when AX reports an empty window title.
+- Empty AX window titles use the app display name as a fallback for cases like installed browser web apps.
 
 ## Current Project Shape
 

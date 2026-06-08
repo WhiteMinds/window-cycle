@@ -122,27 +122,12 @@ final class AXWindowService {
             return title
         }
 
-        if isLikelyInstalledWebApp(application),
-           let appName = application.localizedName?.trimmingCharacters(in: .whitespacesAndNewlines),
+        if let appName = application.localizedName?.trimmingCharacters(in: .whitespacesAndNewlines),
            !appName.isEmpty {
             return appName
         }
 
         return "Untitled Window"
-    }
-
-    private func isLikelyInstalledWebApp(_ application: NSRunningApplication) -> Bool {
-        let bundleIdentifier = application.bundleIdentifier ?? ""
-        if bundleIdentifier.hasPrefix("com.google.Chrome.app.")
-            || bundleIdentifier.hasPrefix("com.microsoft.Edge.app.")
-            || bundleIdentifier.hasPrefix("com.brave.Browser.app.")
-            || bundleIdentifier.hasPrefix("com.operasoftware.Opera.app.") {
-            return true
-        }
-
-        let path = application.bundleURL?.path ?? ""
-        return path.contains("/Chrome Apps.localized/")
-            || path.contains("/Edge Apps.localized/")
     }
 
     private func orderWindows(_ windows: [AppWindow], focusedWindow: AXUIElement?) -> [AppWindow] {
