@@ -41,4 +41,12 @@ final class SwitcherModel: ObservableObject {
             selectedIndex = (selectedIndex - 1 + windows.count) % windows.count
         }
     }
+
+    func selectWindow(at index: Int) {
+        guard windows.indices.contains(index) else {
+            return
+        }
+
+        selectedIndex = index
+    }
 }

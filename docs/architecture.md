@@ -69,6 +69,8 @@ Current row shape:
 - app icon
 - window title
 - selected row uses accent color
+- mouse hover selects a row
+- mouse click selects and activates the row
 
 The previous key-hint column was removed because it had no implemented behavior yet.
 

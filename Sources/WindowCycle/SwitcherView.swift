@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SwitcherView: View {
     @ObservedObject var model: SwitcherModel
+    let onActivateSelected: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -28,6 +29,16 @@ struct SwitcherView: View {
                         window: window,
                         isSelected: index == model.selectedIndex
                     )
+                    .contentShape(Rectangle())
+                    .onHover { isHovering in
+                        if isHovering {
+                            model.selectWindow(at: index)
+                        }
+                    }
+                    .onTapGesture {
+                        model.selectWindow(at: index)
+                        onActivateSelected()
+                    }
                 }
             }
         }

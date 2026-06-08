@@ -4,6 +4,11 @@ import SwiftUI
 @MainActor
 final class SwitcherPanelController {
     let model = SwitcherModel()
+    private let onActivateSelected: () -> Void
+
+    init(onActivateSelected: @escaping () -> Void) {
+        self.onActivateSelected = onActivateSelected
+    }
 
     private lazy var panel: NSPanel = {
         let panel = NSPanel(
@@ -19,8 +24,14 @@ final class SwitcherPanelController {
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = true
+        panel.acceptsMouseMovedEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.contentView = NSHostingView(rootView: SwitcherView(model: model))
+        panel.contentView = NSHostingView(
+            rootView: SwitcherView(
+                model: model,
+                onActivateSelected: onActivateSelected
+            )
+        )
         return panel
     }()
 

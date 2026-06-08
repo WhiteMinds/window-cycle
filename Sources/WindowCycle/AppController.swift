@@ -3,7 +3,11 @@ import AppKit
 @MainActor
 final class AppController: NSObject, NSApplicationDelegate {
     private let axWindowService = AXWindowService()
-    private let panelController = SwitcherPanelController()
+    private lazy var panelController = SwitcherPanelController(
+        onActivateSelected: { [weak self] in
+            self?.activateSelectedWindowIfNeeded()
+        }
+    )
     private var hotKeyService: HotKeyService?
     private var modifierReleaseMonitor: ModifierReleaseMonitor?
     private var statusItemController: StatusItemController?
