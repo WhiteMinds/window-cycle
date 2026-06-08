@@ -1,6 +1,6 @@
-# Current App Window Switcher
+# WindowCycle
 
-Prototype for a current-application window switcher:
+WindowCycle is a prototype macOS current-application window switcher:
 
 - `Cmd + \`` shows windows for the current frontmost app and cycles forward.
 - `Cmd + Shift + \`` cycles backward.
@@ -93,6 +93,13 @@ Release outputs are written to `dist/`, which is intentionally git-ignored.
 The DMG is self-signed/not notarized unless you override signing with a
 Developer ID identity and add notarization separately.
 
+## Privacy
+
+WindowCycle uses Accessibility APIs to read window metadata such as app names,
+window titles, frames, and minimized state. The event tap is used only for the
+configured switcher keys while the switcher is visible; keyboard input is not
+recorded or stored.
+
 ## Current Limitations
 
 - No settings UI yet.
@@ -107,4 +114,12 @@ Developer ID identity and add notarization separately.
 - [Current state](docs/current-state.md)
 - [Architecture](docs/architecture.md)
 - [Permissions, signing, and distribution](docs/signing-distribution.md)
+- [Open source packaging patterns](docs/open-source-packaging-patterns.md)
+- [Release checklist](docs/release-checklist.md)
 - [Roadmap](docs/roadmap.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
+## License
+
+WindowCycle is available under the [MIT License](LICENSE).

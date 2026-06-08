@@ -62,6 +62,6 @@ open Package.swift
 ## Release Outputs
 
 - Release app: `dist/WindowCycle.app`
-- DMG: `dist/WindowCycle-0.1.0.dmg`
+- DMG: `dist/WindowCycle-<VERSION>.dmg`
 - `dist/` is git-ignored.
 - The current DMG is self-signed/not notarized.

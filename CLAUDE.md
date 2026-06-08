@@ -49,6 +49,7 @@ open Package.swift
 - `docs/current-state.md`
 - `docs/architecture.md`
 - `docs/signing-distribution.md`
+- `docs/open-source-packaging-patterns.md`
 - `AGENTS.md`
 
 ## Implementation Notes

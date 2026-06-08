@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: macos-latest
+    environment: release
+
+    env:
+      CODESIGN_IDENTITY: WindowCycle Local Code Signing
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show tool versions
+        shell: bash
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Resolve version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          EXPECTED_VERSION="$(tr -d '[:space:]' < VERSION)"
+
+          if [[ "$VERSION" != "$EXPECTED_VERSION" ]]; then
+            echo "Tag version $VERSION does not match VERSION file $EXPECTED_VERSION" >&2
+            exit 1
+          fi
+
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Import codesigning identity
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          P12_PATH="$RUNNER_TEMP/windowcycle-signing.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/windowcycle-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
+
+          printf '%s' "${{ secrets.WINDOWCYCLE_CODESIGN_P12_BASE64 }}" | base64 -D > "$P12_PATH"
+          chmod 600 "$P12_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security import "$P12_PATH" \
+            -k "$KEYCHAIN_PATH" \
+            -P "${{ secrets.WINDOWCYCLE_CODESIGN_PASSWORD }}" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Build DMG
+        shell: bash
+        run: Scripts/build-dmg.sh
+
+      - name: Remove existing release for this tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release delete "$TAG" --yes
+          fi
+
+      - name: Create draft GitHub release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh release create "$TAG" \
+            "dist/WindowCycle-$VERSION.dmg" \
+            --title "WindowCycle $VERSION" \
+            --notes-file CHANGELOG.md \
+            --draft \
+            --verify-tag

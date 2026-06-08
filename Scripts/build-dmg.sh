@@ -2,7 +2,11 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-MARKETING_VERSION="${MARKETING_VERSION:-0.1.0}"
+DEFAULT_MARKETING_VERSION="0.1.0"
+if [[ -f "$ROOT_DIR/VERSION" ]]; then
+  DEFAULT_MARKETING_VERSION="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
+fi
+MARKETING_VERSION="${MARKETING_VERSION:-$DEFAULT_MARKETING_VERSION}"
 DIST_DIR="$ROOT_DIR/dist"
 APP_DIR="$DIST_DIR/WindowCycle.app"
 DMG_ROOT="$ROOT_DIR/.build/dmg-root"

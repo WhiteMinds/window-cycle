@@ -95,6 +95,8 @@ Consider Developer ID only after the app has enough real users to justify the ye
 
 ## Release Commands
 
+`VERSION` is the source for release filenames and bundle marketing version unless `MARKETING_VERSION` is overridden.
+
 ```sh
 Scripts/build-release.sh
 Scripts/build-dmg.sh
@@ -104,10 +106,9 @@ Scripts/install-local.sh
 Release outputs:
 
 - `dist/WindowCycle.app`
-- `dist/WindowCycle-0.1.0.dmg`
+- `dist/WindowCycle-<VERSION>.dmg`
 
 ## Release TODO
 
-- add a privacy note explaining that keyboard events are not recorded
 - decide whether to include the self-signed experimental DMG in GitHub Releases
 - add optional Developer ID notarization later

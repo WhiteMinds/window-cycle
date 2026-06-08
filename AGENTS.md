@@ -17,11 +17,12 @@ swift build
 Scripts/build-app.sh
 Scripts/build-release.sh
 Scripts/build-dmg.sh
+Scripts/install-local.sh
 open .build/WindowCycle.app
 pkill -x WindowCycle
 ```
 
-The build script uses `WindowCycle Local Code Signing` when available and falls back to ad-hoc signing.
+`VERSION` is the default app marketing version. The build script uses `WindowCycle Local Code Signing` when available and falls back to ad-hoc signing.
 
 ## Architecture Pointers
 
@@ -33,7 +34,8 @@ The build script uses `WindowCycle Local Code Signing` when available and falls 
 - `SwitcherPanelController.swift`: AppKit `NSPanel`
 - `SwitcherView.swift`: SwiftUI list content
 
-Read `docs/current-state.md` and `docs/architecture.md` before making changes.
+Read `docs/current-state.md`, `docs/architecture.md`, `docs/signing-distribution.md`,
+and `docs/open-source-packaging-patterns.md` before making changes.
 
 ## Constraints
 

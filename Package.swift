@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "CurrentAppWindowSwitcher",
+    name: "WindowCycle",
     platforms: [
         .macOS(.v14)
     ],
