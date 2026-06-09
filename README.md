@@ -27,6 +27,33 @@ This is a prototype, not a finished product. It intentionally uses public APIs f
 - Accessibility permission for the app/executable
 - Input Monitoring may be needed for consuming arrow/Escape key events
 
+## Install From GitHub Releases
+
+Download `WindowCycle-<version>.dmg` from
+[GitHub Releases](https://github.com/WhiteMinds/window-cycle/releases), open
+the DMG, and drag `WindowCycle.app` to Applications.
+
+The current DMG is self-signed/not notarized, so macOS may block the first
+launch with a message like "`WindowCycle` Not Opened" or "Apple could not verify
+`WindowCycle` is free of malware." If that happens:
+
+1. Click `Done`, not `Move to Trash`.
+2. Open `System Settings` -> `Privacy & Security`.
+3. Scroll to `Security` and click `Open Anyway` for WindowCycle.
+4. Confirm with `Open`.
+
+After the app opens, grant Accessibility permission when prompted. If arrow
+navigation or Escape is not consumed by the switcher, also grant Input
+Monitoring permission in `System Settings` -> `Privacy & Security`.
+
+If `Open Anyway` does not appear and you trust the downloaded release, you can
+remove the quarantine flag manually:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/WindowCycle.app
+open /Applications/WindowCycle.app
+```
+
 ## Run From Xcode
 
 Open the package in Xcode:

@@ -3,6 +3,7 @@
 .swiftpm/
 DerivedData/
 dist/
+.playwright-mcp/
 
 *.xcuserstate
 xcuserdata/

@@ -64,6 +64,23 @@ Downsides:
 - users may need right-click Open or System Settings Open Anyway
 - users should not be asked to install/trust the developer's self-signed root certificate
 
+Current first-launch instructions for the GitHub Releases DMG:
+
+1. Download the DMG from GitHub Releases.
+2. Open the DMG and drag `WindowCycle.app` to Applications.
+3. Launch WindowCycle.
+4. If macOS shows "`WindowCycle` Not Opened" or "Apple could not verify `WindowCycle` is free of malware," click `Done`.
+5. Open `System Settings` -> `Privacy & Security`, scroll to `Security`, click `Open Anyway` for WindowCycle, and confirm with `Open`.
+6. Grant Accessibility permission. If arrow navigation or Escape is not consumed by the switcher, also grant Input Monitoring permission.
+
+If `Open Anyway` does not appear, trusted test users can remove the quarantine
+flag manually:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/WindowCycle.app
+open /Applications/WindowCycle.app
+```
+
 ### Proper Public DMG Distribution
 
 Best user experience, but costs Apple Developer Program membership:

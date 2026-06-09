@@ -32,6 +32,14 @@ hdiutil imageinfo "dist/WindowCycle-$(cat VERSION).dmg"
 
 Before publishing, also scan public docs for accidental local paths, private research notes, and machine-specific identifiers.
 
+Because the current DMG is self-signed/not notarized, make sure the release
+notes include the first-launch Gatekeeper instructions:
+
+1. Click `Done` if macOS shows "`WindowCycle` Not Opened."
+2. Open `System Settings` -> `Privacy & Security` -> `Security`.
+3. Click `Open Anyway` for WindowCycle and confirm with `Open`.
+4. Grant Accessibility permission, and grant Input Monitoring if arrow/Escape handling is not consumed by the switcher.
+
 ## GitHub Release
 
 The release workflow in `.github/workflows/release.yml` creates a draft GitHub
