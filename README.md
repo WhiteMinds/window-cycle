@@ -10,7 +10,7 @@ WindowCycle is a prototype macOS current-application window switcher:
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/14a5a609-f4bd-473e-bd02-01887139caa4" controls="controls" width="100%"></video>
+<video src="https://github.com/user-attachments/assets/496e7a27-462a-47e9-b3a4-565caf297354" controls="controls" width="100%"></video>
 
 This is a prototype, not a finished product. It intentionally uses public APIs first:
 
