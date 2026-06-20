@@ -1,8 +1,8 @@
 # Architecture
 
-Last updated: 2026-06-08
+Last updated: 2026-06-20
 
-The app intentionally uses public APIs first. Private CGS/SLS Spaces APIs are not used in the prototype.
+The app intentionally uses public APIs first. The one sanctioned exception is the optional window preview feature, which uses the private `_AXUIElementGetWindow` (AX→CGWindowID) bridge and the private SkyLight `CGSHWCaptureWindowList` capture API. Private CGS/SLS Spaces APIs are not used.
 
 ## Main Components
 
@@ -75,6 +75,19 @@ Current row shape:
 
 The previous key-hint column was removed because it had no implemented behavior yet.
 
+### Window Previews
+
+Optional, off by default, opt-in via Settings.
+
+- `PrivateWindowAPI` declares the private bridges: `AXUIElement.cgWindowID()` via `_AXUIElementGetWindow`, and `WindowServer.captureImage(of:)` via SkyLight `CGSHWCaptureWindowList`. SkyLight is linked through `Package.swift` linker flags.
+- `WindowThumbnailService` captures images on a background queue and caches them by `CGWindowID`. The cache is stale-while-revalidate: a cached image shows immediately, and a window is only re-captured once older than a short refresh interval. Results are delivered on the main actor via `onCapture`.
+- `ScreenRecordingPermission` wraps the public `CGPreflightScreenCaptureAccess`/`CGRequestScreenCaptureAccess`. Permission is requested only when the user enables previews.
+- `PreviewSettings` persists the three options (enabled, position left/right, mode selected-only/all) in `UserDefaults`.
+- `SettingsWindowController` hosts the SwiftUI settings form.
+- `AppController` pre-warms thumbnails on switcher open (during the ~125ms panel delay), capturing the selected window first.
+- In "all windows" mode `SwitcherView` renders a per-row thumbnail inside the list.
+- In "selected window only" mode `PreviewPanelController` shows a separate floating panel beside the list (left or right), so the list panel's size and layout are never affected by previews. `SwitcherPanelController` owns it and positions it relative to its own frame.
+
 ### `ModifierReleaseMonitor`
 
 Uses:
@@ -113,7 +126,7 @@ It shows:
 ## Current Limitations
 
 - No AXObserver cache yet; windows are refreshed when the switcher opens.
-- No settings UI.
+- Settings UI covers window previews only; other behavior is not yet configurable.
 - No cross-Space/full-screen private API behavior.
 - Window ordering is focused-first plus AX order, not a full recent/z-order model.
 - Input Monitoring onboarding is not polished.

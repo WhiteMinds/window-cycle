@@ -5,11 +5,15 @@ final class AppController: NSObject, NSApplicationDelegate {
     private static let delayedPanelShowNanoseconds: UInt64 = 125_000_000
 
     private let axWindowService = AXWindowService()
+    private let previewSettings = PreviewSettings()
+    private let thumbnailService = WindowThumbnailService()
     private lazy var panelController = SwitcherPanelController(
+        settings: previewSettings,
         onActivateSelected: { [weak self] in
             self?.activateSelectedWindowIfNeeded()
         }
     )
+    private lazy var settingsWindowController = SettingsWindowController(settings: previewSettings)
     private var hotKeyService: HotKeyService?
     private var modifierReleaseMonitor: ModifierReleaseMonitor?
     private var statusItemController: StatusItemController?
@@ -19,6 +23,10 @@ final class AppController: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+
+        thumbnailService.onCapture = { [weak self] windowID, image in
+            self?.panelController.model.setThumbnail(image, for: windowID)
+        }
 
         let accessibilityTrusted = axWindowService.requestAccessibilityIfNeeded()
 
@@ -43,6 +51,9 @@ final class AppController: NSObject, NSApplicationDelegate {
         statusItemController = StatusItemController(
             onShowWindows: { [weak self] in
                 self?.showSwitcher(.next, delayed: false)
+            },
+            onShowSettings: { [weak self] in
+                self?.settingsWindowController.show()
             },
             onShowPermissions: { [weak self] in
                 self?.showPermissions()
@@ -98,6 +109,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         do {
             let windows = try axWindowService.currentApplicationWindows()
             panelController.model.setWindows(windows, direction: direction)
+            prefetchThumbnailsIfNeeded()
             beginSwitcher()
 
             if delayed {
@@ -113,6 +125,32 @@ final class AppController: NSObject, NSApplicationDelegate {
             cancelPendingPanelShow()
             showPanel()
         }
+    }
+
+    /// Pre-warms window previews on session start so thumbnails are ready by
+    /// the time the panel appears. Captures the selected window first.
+    private func prefetchThumbnailsIfNeeded() {
+        guard previewSettings.isEnabled,
+              ScreenRecordingPermission.isGranted()
+        else {
+            return
+        }
+
+        let model = panelController.model
+        let windowIDs = model.windows.compactMap(\.cgWindowID)
+        thumbnailService.prune(keeping: Set(windowIDs))
+
+        // Show any cached image immediately (stale-while-revalidate).
+        for window in model.windows {
+            if let id = window.cgWindowID, let cached = thumbnailService.image(for: id) {
+                model.setThumbnail(cached, for: id)
+            }
+        }
+
+        // Capture the selected window first, then the rest.
+        let selectedID = model.selectedWindow?.cgWindowID
+        let prioritized = selectedID.map { [$0] + windowIDs.filter { $0 != selectedID } } ?? windowIDs
+        thumbnailService.prefetch(prioritized)
     }
 
     private func cancelSwitcher() {

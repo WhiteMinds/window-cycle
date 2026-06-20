@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import Combine
 
 @MainActor
@@ -7,6 +8,8 @@ final class SwitcherModel: ObservableObject {
     @Published var statusText = ""
     @Published var windows: [AppWindow] = []
     @Published var selectedIndex = 0
+    /// Captured preview images keyed by window ID. Populated asynchronously.
+    @Published var thumbnails: [CGWindowID: NSImage] = [:]
 
     var selectedWindow: AppWindow? {
         guard windows.indices.contains(selectedIndex) else {
@@ -15,8 +18,17 @@ final class SwitcherModel: ObservableObject {
         return windows[selectedIndex]
     }
 
+    func thumbnail(for window: AppWindow) -> NSImage? {
+        window.cgWindowID.flatMap { thumbnails[$0] }
+    }
+
+    func setThumbnail(_ image: NSImage, for windowID: CGWindowID) {
+        thumbnails[windowID] = image
+    }
+
     func setWindows(_ windows: [AppWindow], direction: WindowCycleDirection) {
         self.windows = windows
+        thumbnails = [:]
         appName = windows.first?.appName ?? "Current App"
         statusText = windows.isEmpty ? "No windows found for the current app" : ""
 

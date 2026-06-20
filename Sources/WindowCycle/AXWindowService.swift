@@ -106,6 +106,7 @@ final class AXWindowService {
             bundleIdentifier: application.bundleIdentifier,
             appIcon: application.icon,
             axElement: element,
+            cgWindowID: element.cgWindowID(),
             title: resolveWindowTitle(snapshot.title, application: application),
             subrole: snapshot.subrole,
             frame: snapshot.frame ?? .zero,

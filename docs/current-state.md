@@ -16,8 +16,9 @@ Last updated: 2026-06-08
 - `Up` and `Down` move the selection while switching is active.
 - Hovering a row with the mouse selects that window, and clicking a row activates it.
 - `Up`, `Down`, repeated grave key presses, and `Esc` are consumed by the event tap while switching is active so the underlying app should not also receive them.
-- A menu bar status item provides Show, Hide, and Quit.
+- A menu bar status item provides Show, Settings, Hide, Permissions, and Quit.
 - A permissions panel checks Accessibility and keyboard event tap availability and links to System Settings.
+- Optional window previews (off by default). When enabled in Settings, each window's image is captured and shown either as a single large preview of the selected window or as a thumbnail beside every row, on the left or right side. Requires Screen Recording permission, requested on enable; degrades to a plain list when not granted.
 - The switcher is a compact upper-screen floating panel, not centered.
 - Empty AX window titles use the app display name as a fallback for cases like installed browser web apps.
 - Window metadata is read with batched AX attributes and keeps subrole, modal, main, focused, minimized, and frame state.

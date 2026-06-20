@@ -8,6 +8,7 @@ struct AppWindow: Identifiable {
     let bundleIdentifier: String?
     let appIcon: NSImage?
     let axElement: AXUIElement
+    var cgWindowID: CGWindowID?
     var title: String
     var subrole: String
     var frame: CGRect

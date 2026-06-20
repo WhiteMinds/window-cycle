@@ -13,7 +13,16 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "WindowCycle",
-            path: "Sources/WindowCycle"
+            path: "Sources/WindowCycle",
+            linkerSettings: [
+                // Window previews call into the private SkyLight Window Server
+                // capture API (CGSHWCaptureWindowList). SkyLight lives in
+                // PrivateFrameworks, which is not on the default link path.
+                .unsafeFlags([
+                    "-F", "/System/Library/PrivateFrameworks",
+                    "-framework", "SkyLight"
+                ])
+            ]
         )
     ]
 )

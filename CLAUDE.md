@@ -36,11 +36,13 @@ open Package.swift
 - `Up` / `Down` move one row while the switcher is visible.
 - `Up` / `Down` / `Esc` are consumed while the switcher is visible.
 - The panel appears near the upper screen region.
+- Optional window previews (off by default): toggle in Settings, choose left/right side and "selected window only" vs "all windows".
 
 ## Permissions
 
 - Accessibility is required for AX APIs.
 - Input Monitoring may be required for the active event tap.
+- Screen Recording is required only for window previews; it is requested when the user enables previews in Settings, and previews degrade to a plain list when not granted.
 - Local development uses the self-signed identity `WindowCycle Local Code Signing`.
 - Release outputs are written to `dist/`.
 
@@ -56,6 +58,7 @@ open Package.swift
 
 - Use public APIs first.
 - Do not use private CGS/SLS Spaces APIs unless explicitly requested.
+- Window previews are the sanctioned exception: they use the private `_AXUIElementGetWindow` (AX→CGWindowID bridge) and the private SkyLight `CGSHWCaptureWindowList` capture API (linked via `Package.swift` linker flags). These were explicitly requested to guarantee capture of minimized/occluded windows. Declarations live in `PrivateWindowAPI.swift`.
 - Do not copy third-party code or assets.
 - Keep UI compact and operational, not marketing-like.
 - Run `swift build` before handing off changes.
