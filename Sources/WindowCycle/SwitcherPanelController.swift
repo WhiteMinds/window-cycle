@@ -84,7 +84,7 @@ final class SwitcherPanelController {
         let rowStride = (allMode ? settings.size.rowHeight : PreviewMetrics.baseRowHeight)
             + PreviewMetrics.rowSpacing
         let minHeight: CGFloat = 66
-        let maxHeight: CGFloat = allMode ? 620 : 294
+        let maxHeight: CGFloat = allMode ? 760 : 294
 
         let height = count == 0
             ? minHeight

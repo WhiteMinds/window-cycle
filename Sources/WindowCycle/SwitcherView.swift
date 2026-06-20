@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// Shared layout constants used by `SwitcherView`, `SwitcherPanelController`,
 /// and `PreviewPanelController` so panels can size and position to match.
@@ -27,10 +28,11 @@ struct SwitcherView: View {
     @ObservedObject var settings: PreviewSettings
     let onActivateSelected: () -> Void
 
-    /// Last hover location seen this session. Hover only changes the selection
-    /// once the mouse actually moves, so a panel appearing under a stationary
-    /// cursor does not steal the selection.
-    @State private var lastHoverLocation: CGPoint?
+    /// Physical cursor position (screen coordinates) seen on the last hover
+    /// event this session. Hover only changes the selection when this actually
+    /// changes, so neither a panel appearing under a stationary cursor nor a
+    /// keyboard-driven re-render (which re-delivers hover) can steal it.
+    @State private var lastMouseLocation: CGPoint?
 
     private var showsRowThumbnails: Bool {
         settings.isEnabled && settings.mode == .all && !model.windows.isEmpty
@@ -50,7 +52,7 @@ struct SwitcherView: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 7))
         .onChange(of: model.sessionID) { _, _ in
-            lastHoverLocation = nil
+            lastMouseLocation = nil
         }
     }
 
@@ -87,16 +89,20 @@ struct SwitcherView: View {
         }
     }
 
-    /// Updates the selection from a hover location, but only after the cursor
-    /// has actually moved from where it was when the list appeared.
+    /// Updates the selection from a hover, but only when the physical cursor
+    /// actually moved. The SwiftUI `location` (used for row mapping) is
+    /// re-delivered on keyboard-driven re-renders without any real movement, so
+    /// movement is judged from `NSEvent.mouseLocation` (true screen position).
     private func handleHover(at location: CGPoint) {
-        defer { lastHoverLocation = location }
+        let mouseLocation = NSEvent.mouseLocation
+        defer { lastMouseLocation = mouseLocation }
 
-        guard let last = lastHoverLocation else {
-            // First event of the session is the baseline; ignore it.
+        guard let last = lastMouseLocation else {
+            // Session baseline; wait for an actual move before selecting.
             return
         }
-        guard hypot(location.x - last.x, location.y - last.y) > 1.5 else {
+        guard mouseLocation != last else {
+            // No physical movement (re-render or keyboard) — leave selection.
             return
         }
 

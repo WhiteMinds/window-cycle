@@ -61,14 +61,18 @@ enum PreviewSize: String, CaseIterable, Identifiable {
     case small
     case medium
     case large
+    case extraLarge
+    case huge
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .small: return "Small"
-        case .medium: return "Medium"
-        case .large: return "Large"
+        case .small: return "S"
+        case .medium: return "M"
+        case .large: return "L"
+        case .extraLarge: return "XL"
+        case .huge: return "XXL"
         }
     }
 
@@ -78,6 +82,8 @@ enum PreviewSize: String, CaseIterable, Identifiable {
         case .small: return CGSize(width: 200, height: 130)
         case .medium: return CGSize(width: 260, height: 168)
         case .large: return CGSize(width: 340, height: 220)
+        case .extraLarge: return CGSize(width: 440, height: 284)
+        case .huge: return CGSize(width: 560, height: 360)
         }
     }
 
@@ -87,6 +93,8 @@ enum PreviewSize: String, CaseIterable, Identifiable {
         case .small: return CGSize(width: 72, height: 42)
         case .medium: return CGSize(width: 96, height: 54)
         case .large: return CGSize(width: 132, height: 76)
+        case .extraLarge: return CGSize(width: 176, height: 100)
+        case .huge: return CGSize(width: 224, height: 128)
         }
     }
 
@@ -96,6 +104,8 @@ enum PreviewSize: String, CaseIterable, Identifiable {
         case .small: return 50
         case .medium: return 62
         case .large: return 84
+        case .extraLarge: return 110
+        case .huge: return 140
         }
     }
 }
