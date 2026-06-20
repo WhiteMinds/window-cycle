@@ -13,9 +13,9 @@ Last updated: 2026-06-08
 - When opening forward, the focused/current window is placed first and the default selection moves to the second window when there is more than one window.
 - Releasing Command activates the selected window and hides the switcher.
 - `Esc` hides the switcher.
-- `Up` and `Down` move the selection while switching is active.
-- Hovering a row with the mouse selects that window, and clicking a row activates it.
-- `Up`, `Down`, repeated grave key presses, and `Esc` are consumed by the event tap while switching is active so the underlying app should not also receive them.
+- `Up` and `Down`, or `K` and `J` (Vim-style), move the selection while switching is active.
+- Hovering a row with the mouse selects that window only after the cursor moves (a panel appearing under a stationary cursor does not change the selection), and clicking a row activates it.
+- `Up`, `Down`, `J`, `K`, repeated grave key presses, and `Esc` are consumed by the event tap while switching is active so the underlying app should not also receive them.
 - A menu bar status item provides Show, Settings, Hide, Permissions, and Quit.
 - A permissions panel checks Accessibility and keyboard event tap availability and links to System Settings.
 - Optional window previews (off by default). When enabled in Settings, each window's image is captured and shown either as a single large preview of the selected window or as a thumbnail beside every row, on the left or right side. Requires Screen Recording permission, requested on enable; degrades to a plain list when not granted.

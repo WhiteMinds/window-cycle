@@ -164,10 +164,10 @@ final class ModifierReleaseMonitor {
                 onEscape()
             }
             return true
-        case kVK_UpArrow:
+        case kVK_UpArrow, kVK_ANSI_K:
             moveSelection(.previous)
             return true
-        case kVK_DownArrow:
+        case kVK_DownArrow, kVK_ANSI_J:
             moveSelection(.next)
             return true
         case kVK_ANSI_Grave where isCommandDown:

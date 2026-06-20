@@ -10,6 +10,9 @@ final class SwitcherModel: ObservableObject {
     @Published var selectedIndex = 0
     /// Captured preview images keyed by window ID. Populated asynchronously.
     @Published var thumbnails: [CGWindowID: NSImage] = [:]
+    /// Increments on each new switcher session, so views can reset per-session
+    /// state such as the mouse-hover baseline.
+    @Published private(set) var sessionID = 0
 
     var selectedWindow: AppWindow? {
         guard windows.indices.contains(selectedIndex) else {
@@ -29,6 +32,7 @@ final class SwitcherModel: ObservableObject {
     func setWindows(_ windows: [AppWindow], direction: WindowCycleDirection) {
         self.windows = windows
         thumbnails = [:]
+        sessionID &+= 1
         appName = windows.first?.appName ?? "Current App"
         statusText = windows.isEmpty ? "No windows found for the current app" : ""
 

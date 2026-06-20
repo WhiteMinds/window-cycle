@@ -33,8 +33,9 @@ open Package.swift
 - First forward open selects the second row when multiple windows exist.
 - Releasing Command activates the selected window.
 - `Esc` cancels.
-- `Up` / `Down` move one row while the switcher is visible.
-- `Up` / `Down` / `Esc` are consumed while the switcher is visible.
+- `Up` / `Down` (or `K` / `J`, Vim-style) move one row while the switcher is visible.
+- `Up` / `Down` / `J` / `K` / `Esc` are consumed while the switcher is visible.
+- Mouse hover only changes the selection after the cursor actually moves, so a panel appearing under a stationary cursor does not steal the selection.
 - The panel appears near the upper screen region.
 - Optional window previews (off by default): toggle in Settings, choose left/right side and "selected window only" vs "all windows".
 

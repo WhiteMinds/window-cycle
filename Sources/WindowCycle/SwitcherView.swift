@@ -27,8 +27,17 @@ struct SwitcherView: View {
     @ObservedObject var settings: PreviewSettings
     let onActivateSelected: () -> Void
 
+    /// Last hover location seen this session. Hover only changes the selection
+    /// once the mouse actually moves, so a panel appearing under a stationary
+    /// cursor does not steal the selection.
+    @State private var lastHoverLocation: CGPoint?
+
     private var showsRowThumbnails: Bool {
         settings.isEnabled && settings.mode == .all && !model.windows.isEmpty
+    }
+
+    private var rowHeight: CGFloat {
+        showsRowThumbnails ? settings.size.rowHeight : PreviewMetrics.baseRowHeight
     }
 
     var body: some View {
@@ -40,6 +49,9 @@ struct SwitcherView: View {
         .padding(.vertical, PreviewMetrics.verticalPadding)
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 7))
+        .onChange(of: model.sessionID) { _, _ in
+            lastHoverLocation = nil
+        }
     }
 
     @ViewBuilder
@@ -61,17 +73,37 @@ struct SwitcherView: View {
                         previewSize: settings.size
                     )
                     .contentShape(Rectangle())
-                    .onHover { isHovering in
-                        if isHovering {
-                            model.selectWindow(at: index)
-                        }
-                    }
                     .onTapGesture {
                         model.selectWindow(at: index)
                         onActivateSelected()
                     }
                 }
             }
+            .onContinuousHover(coordinateSpace: .local) { phase in
+                if case let .active(location) = phase {
+                    handleHover(at: location)
+                }
+            }
+        }
+    }
+
+    /// Updates the selection from a hover location, but only after the cursor
+    /// has actually moved from where it was when the list appeared.
+    private func handleHover(at location: CGPoint) {
+        defer { lastHoverLocation = location }
+
+        guard let last = lastHoverLocation else {
+            // First event of the session is the baseline; ignore it.
+            return
+        }
+        guard hypot(location.x - last.x, location.y - last.y) > 1.5 else {
+            return
+        }
+
+        let stride = rowHeight + PreviewMetrics.rowSpacing
+        let index = Int(location.y / stride)
+        if model.windows.indices.contains(index), index != model.selectedIndex {
+            model.selectWindow(at: index)
         }
     }
 }
